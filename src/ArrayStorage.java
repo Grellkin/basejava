@@ -7,16 +7,21 @@ public class ArrayStorage {
     private Resume[] storage = new Resume[10000];
     private int cursor;
 
-    //я видел комментарий про то что необходимо сделать именно null, но зачем??
+
     void clear() {
-        storage = null;
+        for (int i = 0; i < cursor; i++) {
+            storage[i] = null;
+        }
         cursor = 0;
-        storage = new Resume[10000];
     }
 
     void save(Resume r) {
-        if (cursor == storage.length) System.out.println("Sorry, storage is full.");
-        else storage[cursor++] = r;
+        if (cursor == storage.length) {
+            System.out.println("Sorry, storage is full.");
+        }
+        else {
+            storage[cursor++] = r;
+        }
     }
 
     Resume get(String uuid) {
@@ -28,7 +33,9 @@ public class ArrayStorage {
         int index = searchPositionByUuid(uuid);
         if (index != -1) {
             System.arraycopy(storage, index + 1, storage, index, (--cursor) - index);
-        } else System.out.println("Sorry, can`t find element with id = " + uuid);
+        } else {
+            System.out.println("Sorry, can`t find element with id = " + uuid);
+        }
     }
 
     /**
@@ -45,7 +52,9 @@ public class ArrayStorage {
 
     private int searchPositionByUuid(String uuid) {
         for (int i = 0; i < cursor; i++) {
-            if (storage[i].uuid.equals(uuid)) return i;
+            if (storage[i].uuid.equals(uuid)) {
+                return i;
+            }
         }
         return -1;
     }
