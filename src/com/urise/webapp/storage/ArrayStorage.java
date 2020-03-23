@@ -7,8 +7,9 @@ import java.util.Arrays;
 /**
  * Array based storage for Resumes
  */
-public class ArrayStorage {
-    private Resume[] storage = new Resume[10000];
+public class ArrayStorage implements Storage {
+    public static final int STORAGE_LIMIT = 10000;
+    private Resume[] storage = new Resume[STORAGE_LIMIT];
     private int cursor;
 
     public void clear() {
@@ -19,7 +20,7 @@ public class ArrayStorage {
     public void save(Resume r) {
         if (searchPositionByUuid(r.getUuid()) != -1){
             System.out.println("Sorry, this resume already exists.");
-        } else if (cursor == storage.length) {
+        } else if (cursor == STORAGE_LIMIT) {
             System.out.println("Sorry, storage is full.");
         } else {
             storage[cursor++] = r;
