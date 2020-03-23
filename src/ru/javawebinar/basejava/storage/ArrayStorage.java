@@ -1,6 +1,6 @@
-package com.urise.webapp.storage;
+package ru.javawebinar.basejava.storage;
 
-import com.urise.webapp.model.Resume;
+import ru.javawebinar.basejava.model.Resume;
 
 /**
  * Array based storage for Resumes
@@ -17,16 +17,7 @@ public class ArrayStorage extends AbstractArrayStorage {
         }
     }
 
-    public Resume get(String uuid) {
-        int index = searchPositionByUuid(uuid);
-        if (index != -1) {
-            return storage[index];
-        }
-        System.out.println("Can`t find element with uuid =" + uuid);
-        return null;
-    }
-
-   public void delete(String uuid) {
+    public void delete(String uuid) {
         int index = searchPositionByUuid(uuid);
         if (index != -1) {
             storage[index] = storage[size() -1];
@@ -36,16 +27,7 @@ public class ArrayStorage extends AbstractArrayStorage {
         }
     }
 
-    public void update(Resume resume){
-        int index;
-        if ((index = searchPositionByUuid(resume.getUuid())) != -1) {
-            storage[index] = resume;
-        }else{
-            System.out.println("Resume not found in storage.");
-        }
-    }
-
-    private int searchPositionByUuid(String uuid) {
+    protected int searchPositionByUuid(String uuid) {
         for (int i = 0; i < size(); i++) {
             if (storage[i].getUuid().equals(uuid)) {
                 return i;
