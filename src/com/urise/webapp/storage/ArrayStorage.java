@@ -2,25 +2,15 @@ package com.urise.webapp.storage;
 
 import com.urise.webapp.model.Resume;
 
-import java.util.Arrays;
-
 /**
  * Array based storage for Resumes
  */
-public class ArrayStorage implements Storage {
-    public static final int STORAGE_LIMIT = 10000;
-    private Resume[] storage = new Resume[STORAGE_LIMIT];
-    private int cursor;
-
-    public void clear() {
-        Arrays.fill(storage, null);
-        cursor = 0;
-    }
+public class ArrayStorage extends AbstractArrayStorage {
 
     public void save(Resume r) {
         if (searchPositionByUuid(r.getUuid()) != -1){
             System.out.println("Sorry, this resume already exists.");
-        } else if (cursor == STORAGE_LIMIT) {
+        } else if (size() == STORAGE_LIMIT) {
             System.out.println("Sorry, storage is full.");
         } else {
             storage[cursor++] = r;
@@ -39,19 +29,11 @@ public class ArrayStorage implements Storage {
    public void delete(String uuid) {
         int index = searchPositionByUuid(uuid);
         if (index != -1) {
-            storage[index] = storage[cursor-1];
+            storage[index] = storage[size() -1];
             storage[--cursor]=null;
         } else{
             System.out.println("Can`t find element with uuid = " + uuid);
         }
-    }
-
-    public Resume[] getAll() {
-        return Arrays.copyOfRange(storage, 0, cursor);
-    }
-
-    public int size() {
-        return cursor;
     }
 
     public void update(Resume resume){
@@ -64,7 +46,7 @@ public class ArrayStorage implements Storage {
     }
 
     private int searchPositionByUuid(String uuid) {
-        for (int i = 0; i < cursor; i++) {
+        for (int i = 0; i < size(); i++) {
             if (storage[i].getUuid().equals(uuid)) {
                 return i;
             }
