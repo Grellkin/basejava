@@ -19,11 +19,9 @@ public class ArrayStorage {
     public void save(Resume r) {
         if (searchPositionByUuid(r.getUuid()) != -1){
             System.out.println("Sorry, this resume already exists.");
-        }
-        else if (cursor == storage.length) {
+        } else if (cursor == storage.length) {
             System.out.println("Sorry, storage is full.");
-        }
-        else {
+        } else {
             storage[cursor++] = r;
         }
     }
@@ -32,10 +30,9 @@ public class ArrayStorage {
         int index = searchPositionByUuid(uuid);
         if (index != -1) {
             return storage[index];
-        } else {
-            System.out.println("Can`t find element with uuid =" + uuid);
-            return null;
         }
+        System.out.println("Can`t find element with uuid =" + uuid);
+        return null;
     }
 
    public void delete(String uuid) {
