@@ -9,13 +9,10 @@ public class MainTestArrayStorage {
     private static final Storage STORAGE = new SortedArrayStorage();
 
     public static void main(String[] args) {
-        final Resume r1 = new Resume();
-        r1.setUuid("uuid1");
-        final Resume r2 = new Resume();
-        r2.setUuid("uuid2");
-        final Resume r3 = new Resume();
-        r3.setUuid("uuid3");
-        
+        final Resume r1 = new Resume("r1");
+        final Resume r2 = new Resume("r2");
+        final Resume r3 = new Resume("r3");
+
         STORAGE.save(r1);
         STORAGE.save(r2);
         STORAGE.save(r3);
