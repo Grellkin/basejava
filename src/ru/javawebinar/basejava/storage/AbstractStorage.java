@@ -8,47 +8,52 @@ public abstract class AbstractStorage implements Storage{
 
     @Override
     public Resume get(String uuid) {
-        if (!isElementPresentInStorage(uuid)){
+        Object searchKey = findSearchKey(uuid);
+        if (!isElementPresentInStorage(searchKey)){
             throw new NotExistStorageException(uuid);
         }
-        return getElement(uuid);
+        return getElement(searchKey);
     }
 
     @Override
     public void delete(String uuid) {
-        if (!isElementPresentInStorage(uuid)){
+        Object searchKey = findSearchKey(uuid);
+        if (!isElementPresentInStorage(searchKey)){
             throw new NotExistStorageException(uuid);
         }
-        removeElement(uuid);
+        removeElement(searchKey);
     }
 
     @Override
     public void save(Resume resume) {
         String uuid = resume.getUuid();
-        if (isElementPresentInStorage(uuid)) {
+        Object searchKey = findSearchKey(uuid);
+        if (isElementPresentInStorage(searchKey)) {
             throw new ExistStorageException(uuid);
         }
-        insertElement(resume);
+        insertElement(searchKey, resume);
     }
 
     @Override
     public void update(Resume resume) {
         String uuid = resume.getUuid();
-        if (!isElementPresentInStorage(uuid)) {
+        Object searchKey = findSearchKey(uuid);
+        if (!isElementPresentInStorage(searchKey)) {
             throw new NotExistStorageException(uuid);
         }
-        updateElement(resume);
+        updateElement(searchKey, resume);
     }
 
 
+    protected abstract Object findSearchKey(String uuid);
 
-    protected abstract boolean isElementPresentInStorage(String uuid);
+    protected abstract boolean isElementPresentInStorage(Object searchKey);
 
-    protected abstract Resume getElement(String uuid);
+    protected abstract Resume getElement(Object searchKey);
 
-    protected abstract void removeElement(String uuid);
+    protected abstract void removeElement(Object searchKey);
 
-    protected abstract void insertElement(Resume resume);
+    protected abstract void insertElement(Object searchKey, Resume resume);
 
-    protected abstract void updateElement(Resume resume);
+    protected abstract void updateElement(Object searchKey, Resume resume);
 }

@@ -13,38 +13,33 @@ public abstract class AbstractArrayStorage extends AbstractStorage {
 
 
     @Override
-    protected boolean isElementPresentInStorage(String uuid) {
-        return searchPositionByUuid(uuid) >= 0;
+    protected boolean isElementPresentInStorage(Object searchKey) {
+        return (Integer) searchKey >= 0;
     }
 
     @Override
-    protected Resume getElement(String uuid) {
-        return storage[searchPositionByUuid(uuid)];
+    protected Resume getElement(Object searchKey) {
+        return storage[(Integer) searchKey];
     }
 
     @Override
-    protected void removeElement(String uuid) {
-        removeResume(searchPositionByUuid(uuid));
+    protected void removeElement(Object searchKey) {
+        removeResume((Integer) searchKey);
     }
 
     @Override
-    protected void insertElement(Resume resume) {
-        String uuid = resume.getUuid();
+    protected void insertElement(Object searchKey, Resume resume) {
         if (size() == STORAGE_LIMIT) {
-            throw new StorageException("Sorry, storage is full.", uuid);
+            throw new StorageException("Sorry, storage is full.", resume.getUuid());
         }
-        insertResume(searchPositionByUuid(uuid), resume);
+        insertResume((Integer) searchKey, resume);
     }
 
     @Override
-    protected void updateElement(Resume resume) {
-        storage[searchPositionByUuid(resume.getUuid())] = resume;
+    protected void updateElement(Object searchKey, Resume resume) {
+        storage[(Integer) searchKey] = resume;
     }
 
-
-    public Resume[] getAll() {
-        return Arrays.copyOfRange(storage, 0, size());
-    }
 
     public int size() {return cursor; }
 
@@ -57,43 +52,9 @@ public abstract class AbstractArrayStorage extends AbstractStorage {
 
     protected abstract void removeResume(int index);
 
-    protected abstract int searchPositionByUuid(String uuid);
 
 
-    //    public void save(Resume resume) {
-//        String uuid = resume.getUuid();
-//        int index = searchPositionByUuid(uuid);
-//        if (index >= 0) {
-//            throw new ExistStorageException(uuid);
-//        } else if (size() == STORAGE_LIMIT) {
-//            throw new StorageException("Sorry, storage is full.", uuid);
-//        }
-//        insertResume(index, resume);
-//    }
 
-    //    public void delete(String uuid) {
-//        int index = searchPositionByUuid(uuid);
-//        if (index < 0) {
-//            throw new NotExistStorageException(uuid);
-//        }
-//        removeResume(index);
-//    }
-
-    //    public Resume get(String uuid) {
-//        if (searchPositionByUuid(uuid) >= 0) {
-//            return storage[searchPositionByUuid(uuid)];
-//        }
-//        throw new NotExistStorageException(uuid);
-//    }
-
-    //    public void update(Resume resume) {
-//        int index;
-//        if ((index = searchPositionByUuid(resume.getUuid())) < 0) {
-//            throw new NotExistStorageException(resume.getUuid());
-//        }
-//        storage[index] = resume;
-//
-//    }
 }
 
 

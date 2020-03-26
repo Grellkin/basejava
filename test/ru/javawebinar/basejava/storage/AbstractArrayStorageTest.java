@@ -13,11 +13,6 @@ public class AbstractArrayStorageTest extends AbstractStorageTest {
         super(storage);
     }
 
-    @Test
-    public void size() {
-        Assert.assertEquals(3, storage.size());
-    }
-
     @Test(expected = StorageException.class)
     public void saveToFullStorage(){
 
@@ -36,4 +31,5 @@ public class AbstractArrayStorageTest extends AbstractStorageTest {
         storage.clear();
         Assert.assertEquals(0, storage.size());
     }
+
 }

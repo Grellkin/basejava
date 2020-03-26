@@ -3,35 +3,44 @@ package ru.javawebinar.basejava.storage;
 import ru.javawebinar.basejava.model.Resume;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class MapStorage extends AbstractStorage {
 
     private Map<String, Resume> storage = new HashMap<>();
 
+
+
     @Override
-    protected boolean isElementPresentInStorage(String uuid) {
-        return storage.containsKey(uuid);
+    protected Object findSearchKey(String uuid) {
+        return uuid;
     }
 
     @Override
-    protected Resume getElement(String uuid) {
-        return storage.get(uuid);
+    protected boolean isElementPresentInStorage(Object searchKey) {
+        return storage.containsKey((String) searchKey);
     }
 
     @Override
-    protected void removeElement(String uuid) {
-        storage.remove(uuid);
+    protected Resume getElement(Object searchKey) {
+        return storage.get((String) searchKey);
     }
 
     @Override
-    protected void insertElement(Resume resume) {
-        storage.put(resume.getUuid(), resume);
+    protected void removeElement(Object searchKey) {
+        storage.remove((String) searchKey);
     }
 
     @Override
-    protected void updateElement(Resume resume) {
-        storage.put(resume.getUuid(), resume);
+    protected void insertElement(Object searchKey, Resume resume) {
+        storage.put((String) searchKey, resume);
+    }
+
+    @Override
+    protected void updateElement(Object searchKey, Resume resume) {
+        storage.put((String) searchKey, resume);
     }
 
     @Override
@@ -40,12 +49,12 @@ public class MapStorage extends AbstractStorage {
     }
 
     @Override
-    public Resume[] getAll() {
-        return storage.values().toArray(new Resume[0]);
+    public List<Resume> getAllSorted() {
+        return storage.values().stream().sorted(Resume.comparatorByFullNameAndUuid).collect(Collectors.toList());
     }
 
     @Override
     public int size() {
-        throw new UnsupportedOperationException();
+        return storage.size();
     }
 }

@@ -10,28 +10,28 @@ public class ListStorage extends AbstractStorage {
     private List<Resume> storage = new ArrayList<>();
 
     @Override
-    protected boolean isElementPresentInStorage(String uuid) {
-        return indexOfElement(uuid) >= 0;
+    protected boolean isElementPresentInStorage(Object searchKey) {
+        return (Integer) searchKey >= 0;
     }
 
     @Override
-    protected Resume getElement(String uuid) {
-        return storage.get(indexOfElement(uuid));
+    protected Resume getElement(Object searchKey) {
+        return storage.get((Integer) searchKey);
     }
 
     @Override
-    protected void removeElement(String uuid) {
-        storage.remove(indexOfElement(uuid));
+    protected void removeElement(Object searchKey) {
+        storage.remove((int)searchKey);
     }
 
     @Override
-    protected void insertElement(Resume resume) {
+    protected void insertElement(Object searchKey, Resume resume) {
         storage.add(resume);
     }
 
     @Override
-    protected void updateElement(Resume resume) {
-        storage.set(indexOfElement(resume.getUuid()), resume);
+    protected void updateElement(Object searchKey, Resume resume) {
+        storage.set((Integer) searchKey, resume);
     }
 
     @Override
@@ -40,17 +40,18 @@ public class ListStorage extends AbstractStorage {
     }
 
     @Override
-    public Resume[] getAll() {
-        return storage.toArray(new Resume[0]);
+    public List<Resume> getAllSorted() {
+        storage.sort(Resume.comparatorByFullNameAndUuid);
+        return storage;
     }
 
     @Override
     public int size() {
-        throw new UnsupportedOperationException();
+       return storage.size();
     }
 
-
-    private int indexOfElement(String uuid){
+    @Override
+    protected Integer findSearchKey(String uuid){
         for (int i = 0; i < storage.size(); i++) {
             if (storage.get(i).getUuid().equals(uuid)){
                 return i;
