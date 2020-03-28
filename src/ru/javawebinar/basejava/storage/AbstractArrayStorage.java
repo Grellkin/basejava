@@ -5,7 +5,7 @@ import ru.javawebinar.basejava.model.Resume;
 
 import java.util.Arrays;
 
-public abstract class AbstractArrayStorage extends AbstractStorage {
+public abstract class AbstractArrayStorage extends AbstractStorage<Integer> {
 
     protected static final int STORAGE_LIMIT = 10000;
     protected Resume[] storage = new Resume[STORAGE_LIMIT];
@@ -13,35 +13,37 @@ public abstract class AbstractArrayStorage extends AbstractStorage {
 
 
     @Override
-    protected boolean isElementPresentInStorage(Object searchKey) {
-        return (Integer) searchKey >= 0;
+    protected boolean isElementPresentInStorage(Integer searchKey) {
+        return (searchKey >= 0);
     }
 
     @Override
-    protected Resume getElement(Object searchKey) {
-        return storage[(Integer) searchKey];
+    protected Resume getElement(Integer searchKey) {
+        return storage[searchKey];
     }
 
     @Override
-    protected void removeElement(Object searchKey) {
-        removeResume((Integer) searchKey);
+    protected void removeElement(Integer searchKey) {
+        removeResume(searchKey);
     }
 
     @Override
-    protected void insertElement(Object searchKey, Resume resume) {
+    protected void insertElement(Integer searchKey, Resume resume) {
         if (size() == STORAGE_LIMIT) {
             throw new StorageException("Sorry, storage is full.", resume.getUuid());
         }
-        insertResume((Integer) searchKey, resume);
+        insertResume(searchKey, resume);
     }
 
     @Override
-    protected void updateElement(Object searchKey, Resume resume) {
-        storage[(Integer) searchKey] = resume;
+    protected void updateElement(Integer searchKey, Resume resume) {
+        storage[searchKey] = resume;
     }
 
 
-    public int size() {return cursor; }
+    public int size() {
+        return cursor;
+    }
 
     public void clear() {
         Arrays.fill(storage, null);
@@ -51,8 +53,6 @@ public abstract class AbstractArrayStorage extends AbstractStorage {
     protected abstract void insertResume(int index, Resume r);
 
     protected abstract void removeResume(int index);
-
-
 
 
 }

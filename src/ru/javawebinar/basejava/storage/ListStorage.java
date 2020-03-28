@@ -5,33 +5,33 @@ import ru.javawebinar.basejava.model.Resume;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ListStorage extends AbstractStorage {
+public class ListStorage extends AbstractStorage<Integer> {
 
     private List<Resume> storage = new ArrayList<>();
 
     @Override
-    protected boolean isElementPresentInStorage(Object searchKey) {
-        return (Integer) searchKey >= 0;
+    protected boolean isElementPresentInStorage(Integer searchKey) {
+        return searchKey >= 0;
     }
 
     @Override
-    protected Resume getElement(Object searchKey) {
-        return storage.get((Integer) searchKey);
+    protected Resume getElement(Integer searchKey) {
+        return storage.get(searchKey);
     }
 
     @Override
-    protected void removeElement(Object searchKey) {
-        storage.remove((int)searchKey);
+    protected void removeElement(Integer searchKey) {
+        storage.remove((int) searchKey);
     }
 
     @Override
-    protected void insertElement(Object searchKey, Resume resume) {
+    protected void insertElement(Integer searchKey, Resume resume) {
         storage.add(resume);
     }
 
     @Override
-    protected void updateElement(Object searchKey, Resume resume) {
-        storage.set((Integer) searchKey, resume);
+    protected void updateElement(Integer searchKey, Resume resume) {
+        storage.set(searchKey, resume);
     }
 
     @Override
@@ -40,20 +40,19 @@ public class ListStorage extends AbstractStorage {
     }
 
     @Override
-    public List<Resume> getAllSorted() {
-        storage.sort(Resume.comparatorByFullNameAndUuid);
-        return storage;
+    protected List<Resume> getCopyOfStorage() {
+        return new ArrayList<>(storage);
     }
 
     @Override
     public int size() {
-       return storage.size();
+        return storage.size();
     }
 
     @Override
-    protected Integer findSearchKey(String uuid){
+    protected Integer findSearchKey(String uuid) {
         for (int i = 0; i < storage.size(); i++) {
-            if (storage.get(i).getUuid().equals(uuid)){
+            if (storage.get(i).getUuid().equals(uuid)) {
                 return i;
             }
         }

@@ -31,10 +31,8 @@ public class ArrayStorage extends AbstractArrayStorage {
         return -1;
     }
 
-    public List<Resume> getAllSorted() {
-        List<Resume> resumes = Arrays.asList(Arrays.copyOfRange(storage, 0, size()));
-        resumes.sort(Resume.comparatorByFullNameAndUuid);
-        return resumes;
-
+    @Override
+    protected List<Resume> getCopyOfStorage() {
+        return Arrays.asList(Arrays.copyOfRange(storage, 0, size()));
     }
 }

@@ -27,8 +27,8 @@ public class SortedArrayStorage extends AbstractArrayStorage {
         return Arrays.binarySearch(storage, 0, size(), r, Resume.comparatorByUuid);
     }
 
-    public List<Resume> getAllSorted() {
+    @Override
+    protected List<Resume> getCopyOfStorage() {
         return Arrays.asList(Arrays.copyOfRange(storage, 0, size()));
-
     }
 }
