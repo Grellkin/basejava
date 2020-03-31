@@ -9,20 +9,13 @@ import ru.javawebinar.basejava.model.Resume;
 
 import java.util.List;
 
+
 import static org.junit.Assert.assertArrayEquals;
+import static ru.javawebinar.basejava.storage.ResumeTestData.*;
 
 public class AbstractStorageTest {
 
     protected Storage storage;
-    protected static final String UUID_1 = "UIID_1";
-    protected static final String UUID_2 = "UIID_2";
-    protected static final String UUID_3 = "UIID_3";
-
-    protected static final String NAME_3 = "Carko";
-    protected static final String NAME_2 = "Bolo";
-    protected static final String NAME_1 = "Anika";
-
-
 
     public AbstractStorageTest(Storage storage) {
         this.storage = storage;
@@ -31,9 +24,9 @@ public class AbstractStorageTest {
     @Before
     public void setUp(){
         storage.clear();
-        storage.save(new Resume(UUID_2, NAME_2));
-        storage.save(new Resume(UUID_1, NAME_1));
-        storage.save(new Resume(UUID_3, NAME_3));
+        storage.save(FIRST_RESUME);
+        storage.save(SECOND_RESUME);
+        storage.save(THIRD_RESUME);
     }
 
     @Test
@@ -61,7 +54,6 @@ public class AbstractStorageTest {
         storage.update(new Resume("Abra_Cadabra", NAME_1));
     }
 
-
     @Test
     public void get() {
         Assert.assertEquals(NAME_1, storage.get(UUID_1).getFullName());
@@ -74,7 +66,6 @@ public class AbstractStorageTest {
     public void getAbsent(){
         storage.get("Abra_Cadabra");
     }
-
 
     @Test
     public void delete() {
