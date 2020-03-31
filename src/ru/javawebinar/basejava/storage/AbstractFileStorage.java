@@ -19,7 +19,7 @@ public abstract class AbstractFileStorage extends AbstractStorage<Path> {
 
     public AbstractFileStorage(Path directory) {
         Objects.requireNonNull(directory, "directory " + directory.getFileName() + " must be not null");
-        if (Files.isDirectory(directory)) {
+        if (!Files.isDirectory(directory)) {
             throw new IllegalArgumentException(directory.getFileName() + " is not a directory");
         }
         if (!Files.isReadable(directory) || !Files.isWritable(directory)) {
@@ -41,6 +41,11 @@ public abstract class AbstractFileStorage extends AbstractStorage<Path> {
     @Override
     protected List<Resume> getCopyOfStorage() {
         MyWalker walker = new MyWalker(MyWalker.COPY_ALL_PARAM);
+        try {
+            Files.walkFileTree(directory, walker);
+        } catch (IOException e) {
+            throw new StorageException("IOException while traversing file tree.", directory.getFileName().toString(), e);
+        }
         return walker.resumes;
     }
 
@@ -65,8 +70,8 @@ public abstract class AbstractFileStorage extends AbstractStorage<Path> {
 
     @Override
     protected void updateElement(Path file, Resume resume) {
-        try {
-            writeResumeToFile(new BufferedOutputStream(Files.newOutputStream(file)), resume);
+        try(BufferedOutputStream os = new BufferedOutputStream(Files.newOutputStream(file))) {
+            writeResumeToFile(os, resume);
         } catch (IOException e) {
             throw new StorageException("IOException while writing to file.", file.getFileName().toString(), e);
         }
@@ -104,7 +109,7 @@ public abstract class AbstractFileStorage extends AbstractStorage<Path> {
 
     protected abstract Resume readResumeFromFile(InputStream inputStream);
 
-    protected abstract void writeResumeToFile(OutputStream outputStream, Resume resume);
+    protected abstract void writeResumeToFile(OutputStream outputStream, Resume resume) throws IOException;
 
     private class MyWalker extends SimpleFileVisitor<Path> {
 

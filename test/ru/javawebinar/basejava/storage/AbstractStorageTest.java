@@ -7,14 +7,16 @@ import ru.javawebinar.basejava.exception.ExistStorageException;
 import ru.javawebinar.basejava.exception.NotExistStorageException;
 import ru.javawebinar.basejava.model.Resume;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
-
 
 import static org.junit.Assert.assertArrayEquals;
 import static ru.javawebinar.basejava.storage.ResumeTestData.*;
 
 public class AbstractStorageTest {
 
+    protected static final Path storagePath = Paths.get("D:\\Internship\\basejava\\storage");
     protected Storage storage;
 
     public AbstractStorageTest(Storage storage) {

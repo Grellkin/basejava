@@ -60,7 +60,7 @@ public class ResumeTestData {
             new Organization("Uncle Vova","www.dadyavova.com", POSITION_5);
     
 
-    public void createSections() {
+    public static void createSections() {
                
         FIRST_RESUME.addSection(SectionType.PERSONAL, TEXT_SECTION_PERSONAL_ONE);
         FIRST_RESUME.addSection(SectionType.OBJECTIVE, TEXT_SECTION_OBJECTIVE_ONE);
