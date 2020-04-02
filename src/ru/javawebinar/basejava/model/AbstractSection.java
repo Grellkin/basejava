@@ -5,6 +5,7 @@ import java.util.Objects;
 
 public abstract class AbstractSection<T> implements Serializable {
     protected final T content;
+    private static final long serialVersionUID = 1L;
 
     public AbstractSection(T content) {
         Objects.requireNonNull(content, "content must be not null");

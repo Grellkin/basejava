@@ -2,6 +2,7 @@ package ru.javawebinar.basejava.storage;
 
 import ru.javawebinar.basejava.exception.StorageException;
 import ru.javawebinar.basejava.model.Resume;
+import ru.javawebinar.basejava.storage.FIleWR.FileWriterReader;
 
 import java.io.*;
 import java.nio.file.FileVisitResult;
@@ -13,12 +14,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public abstract class AbstractFileStorage extends AbstractStorage<Path> {
+public class PathStorage extends AbstractStorage<Path> {
 
     private Path directory;
+    private FileWriterReader fileWR;
 
-    public AbstractFileStorage(Path directory) {
+    public PathStorage(Path directory, FileWriterReader readerWriter) {
         Objects.requireNonNull(directory, "directory " + directory.getFileName() + " must be not null");
+        Objects.requireNonNull(readerWriter, "File reader/writer is required.");
         if (!Files.isDirectory(directory)) {
             throw new IllegalArgumentException(directory.getFileName() + " is not a directory");
         }
@@ -26,117 +29,112 @@ public abstract class AbstractFileStorage extends AbstractStorage<Path> {
             throw new IllegalArgumentException("directory has constraints of reading/writing");
         }
         this.directory = directory;
+        this.fileWR = readerWriter;
     }
 
     @Override
-    protected Path findSearchKey(String file) {
-        return directory.resolve(file);
+    protected Path findSearchKey(String path) {
+        return directory.resolve(path);
     }
 
     @Override
     protected boolean isElementPresentInStorage(Path path) {
-        return Files.exists(path);
+        return Files.isRegularFile(path);
     }
 
     @Override
     protected List<Resume> getCopyOfStorage() {
         MyWalker walker = new MyWalker(MyWalker.COPY_ALL_PARAM);
-        try {
-            Files.walkFileTree(directory, walker);
-        } catch (IOException e) {
-            throw new StorageException("IOException while traversing file tree.", directory.getFileName().toString(), e);
-        }
+        traverseFileTree(walker);
         return walker.resumes;
     }
 
     @Override
-    protected void removeElement(Path file) {
+    protected void removeElement(Path path) {
         try {
-            Files.delete(file);
+            Files.delete(path);
         } catch (IOException e) {
-            throw new StorageException("IOException while deleting file.", file.getFileName().toString(), e);
+            throw new StorageException("IOException while deleting file.", getNameOfFile(path), e);
         }
     }
 
     @Override
-    protected void insertElement(Path file, Resume resume) {
+    protected void insertElement(Path path, Resume resume) {
         try {
-            Files.createFile(file);
+            Files.createFile(path);
         } catch (IOException e) {
-            throw new StorageException("IOException while creating file.", file.getFileName().toString(), e);
+            throw new StorageException("IOException while creating file.", getNameOfFile(path), e);
         }
-        updateElement(file, resume);
+        updateElement(path, resume);
     }
 
     @Override
-    protected void updateElement(Path file, Resume resume) {
-        try(BufferedOutputStream os = new BufferedOutputStream(Files.newOutputStream(file))) {
-            writeResumeToFile(os, resume);
+    protected void updateElement(Path path, Resume resume) {
+        try(BufferedOutputStream os = new BufferedOutputStream(Files.newOutputStream(path))) {
+            fileWR.writeResumeToFile(os, resume);
         } catch (IOException e) {
-            throw new StorageException("IOException while writing to file.", file.getFileName().toString(), e);
+            throw new StorageException("IOException while writing to file.", getNameOfFile(path), e);
         }
     }
 
     @Override
-    protected Resume getElement(Path file) {
+    protected Resume getElement(Path path) {
         try {
-            return readResumeFromFile(new BufferedInputStream(Files.newInputStream(file)));
+            return fileWR.readResumeFromFile(new BufferedInputStream(Files.newInputStream(path)));
         } catch (IOException e) {
-            throw new StorageException("IOException while writing to file.", file.getFileName().toString(), e);
+            throw new StorageException("IOException while writing to file.", getNameOfFile(path), e);
         }
     }
 
     @Override
     public void clear() {
-        MyWalker walker = new MyWalker(MyWalker.CLEAR_PARAM);
-        try {
-            Files.walkFileTree(directory, walker);
-        } catch (IOException e) {
-            throw new StorageException("IOException while traversing file tree.", directory.getFileName().toString(), e);
-        }
+        traverseFileTree(new MyWalker(MyWalker.CLEAR_PARAM));
     }
 
     @Override
     public int size() {
         MyWalker walker = new MyWalker(MyWalker.SIZE_PARAM);
-        try {
-            Files.walkFileTree(directory, walker);
-        } catch (IOException e) {
-            throw new StorageException("IOException while traversing file tree.", directory.getFileName().toString(), e);
-        }
+        traverseFileTree(walker);
         return walker.countOfFiles;
     }
 
-    protected abstract Resume readResumeFromFile(InputStream inputStream);
+    private String getNameOfFile(Path path) {
+        return path.getFileName().toString();
+    }
 
-    protected abstract void writeResumeToFile(OutputStream outputStream, Resume resume) throws IOException;
+    private void traverseFileTree(MyWalker walker) {
+        try {
+            Files.walkFileTree(directory, walker);
+        } catch (IOException e) {
+            throw new StorageException("IOException while traversing file tree.", getNameOfFile(directory), e);
+        }
+    }
 
     private class MyWalker extends SimpleFileVisitor<Path> {
 
         private int countOfFiles = 0;
+        private List<Resume> resumes = new ArrayList<>();
+
         private static final int CLEAR_PARAM = 1;
         private static final int SIZE_PARAM = 2;
         private static final int COPY_ALL_PARAM = 3;
         private final int CHOSEN_PARAM;
-        private List<Resume> resumes = new ArrayList<>();
 
         private MyWalker(int param) {
             CHOSEN_PARAM = param;
         }
 
-
         @Override
-        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-
+        public FileVisitResult visitFile(Path path, BasicFileAttributes attrs) throws IOException {
             switch (CHOSEN_PARAM) {
                 case CLEAR_PARAM:
-                    Files.delete(file);
+                    Files.delete(path);
                     break;
                 case SIZE_PARAM:
                     countOfFiles++;
                     break;
                 case COPY_ALL_PARAM:
-                    resumes.add(getElement(file));
+                    resumes.add(getElement(path));
                     break;
                 default:
             }

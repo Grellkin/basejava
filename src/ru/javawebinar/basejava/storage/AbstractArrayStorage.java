@@ -40,11 +40,12 @@ public abstract class AbstractArrayStorage extends AbstractStorage<Integer> {
         storage[searchKey] = resume;
     }
 
-
+    @Override
     public int size() {
         return cursor;
     }
 
+    @Override
     public void clear() {
         Arrays.fill(storage, null);
         cursor = 0;

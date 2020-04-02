@@ -60,7 +60,7 @@ public class Organization implements Serializable {
                 '}';
     }
 
-    public static class Position {
+    public static class Position implements Serializable{
         protected final LocalDate dateOfStart;
         protected final LocalDate dateOfEnd;
         protected final String position;

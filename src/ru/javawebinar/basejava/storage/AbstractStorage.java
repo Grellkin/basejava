@@ -17,10 +17,7 @@ public abstract class AbstractStorage<SK> implements Storage {
     public Resume get(String uuid) {
         log.debug("Get resume with uuid = " + uuid);
         SK searchKey = findSearchKey(uuid);
-        if (!isElementPresentInStorage(searchKey)) {
-            log.warn("Element " + uuid + " not present in storage");
-            throw new NotExistStorageException(uuid);
-        }
+        checkAndLog(uuid, searchKey);
         return getElement(searchKey);
     }
 
@@ -28,17 +25,14 @@ public abstract class AbstractStorage<SK> implements Storage {
     public void delete(String uuid) {
         log.info("Delete resume with uuid = " + uuid);
         SK searchKey = findSearchKey(uuid);
-        if (!isElementPresentInStorage(searchKey)) {
-            log.warn("Element " + uuid + " not present in storage");
-            throw new NotExistStorageException(uuid);
-        }
+        checkAndLog(uuid, searchKey);
         removeElement(searchKey);
     }
 
     @Override
     public void save(Resume resume) {
         String uuid = resume.getUuid();
-//        log.info("Save resume with uuid = " + uuid);
+//      log.info("Save resume with uuid = " + uuid);
         SK searchKey = findSearchKey(uuid);
         if (isElementPresentInStorage(searchKey)) {
             log.warn("Element " + uuid + " already present in storage");
@@ -52,10 +46,7 @@ public abstract class AbstractStorage<SK> implements Storage {
         String uuid = resume.getUuid();
         log.info("Update resume with uuid = " + uuid);
         SK searchKey = findSearchKey(uuid);
-        if (!isElementPresentInStorage(searchKey)) {
-            log.warn("Element " + uuid + " not present in storage");
-            throw new NotExistStorageException(uuid);
-        }
+        checkAndLog(uuid, searchKey);
         updateElement(searchKey, resume);
     }
 
@@ -64,6 +55,13 @@ public abstract class AbstractStorage<SK> implements Storage {
         List<Resume> list = getCopyOfStorage();
         list.sort(Resume.comparatorByFullNameAndUuid);
         return list;
+    }
+
+    private void checkAndLog(String uuid, SK searchKey) {
+        if (!isElementPresentInStorage(searchKey)) {
+            log.warn("Element " + uuid + " not present in storage");
+            throw new NotExistStorageException(uuid);
+        }
     }
 
     protected abstract List<Resume> getCopyOfStorage();

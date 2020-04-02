@@ -1,11 +1,10 @@
 package ru.javawebinar.basejava.model;
 
+import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 import java.util.*;
 
-/**
- * Initial resume class
- */
+@XmlRootElement
 public class Resume implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -31,6 +30,7 @@ public class Resume implements Serializable {
     }
 
 
+
     public String getUuid() {
         return uuid;
     }
@@ -47,13 +47,14 @@ public class Resume implements Serializable {
         return sections;
     }
 
-    public void addContact(ContactType type, String info){
+    public void addContact(ContactType type, String info) {
         contacts.put(type, info);
     }
 
     public void addSection(SectionType type, AbstractSection<?> section) {
         sections.put(type, section);
     }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

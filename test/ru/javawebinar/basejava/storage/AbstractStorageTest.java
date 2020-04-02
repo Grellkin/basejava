@@ -26,6 +26,8 @@ public class AbstractStorageTest {
     @Before
     public void setUp(){
         storage.clear();
+        createContacts();
+        createSections();
         storage.save(FIRST_RESUME);
         storage.save(SECOND_RESUME);
         storage.save(THIRD_RESUME);
@@ -58,10 +60,9 @@ public class AbstractStorageTest {
 
     @Test
     public void get() {
-        Assert.assertEquals(NAME_1, storage.get(UUID_1).getFullName());
-        Assert.assertEquals(NAME_3, storage.get(UUID_3).getFullName());
-        Assert.assertNotEquals(NAME_3, storage.get(UUID_1).getFullName());
-        Assert.assertNotEquals(NAME_1, storage.get(UUID_2).getFullName());
+        Assert.assertEquals(FIRST_RESUME, storage.get(UUID_1));
+        Assert.assertEquals(THIRD_RESUME, storage.get(UUID_3));
+        Assert.assertNotEquals(THIRD_RESUME, storage.get(UUID_1));
     }
 
     @Test(expected = NotExistStorageException.class)
@@ -73,7 +74,7 @@ public class AbstractStorageTest {
     public void delete() {
         storage.delete(UUID_2);
         storage.delete(UUID_1);
-        Assert.assertEquals(UUID_3, storage.getAllSorted().get(0).getUuid());
+        Assert.assertEquals(THIRD_RESUME, storage.getAllSorted().get(0));
     }
 
     @Test(expected = NotExistStorageException.class)
@@ -89,8 +90,6 @@ public class AbstractStorageTest {
     @Test
     public void getAllSorted() {
         List<Resume> resumes = storage.getAllSorted();
-        assertArrayEquals(
-                new Resume[]{new Resume(UUID_1, NAME_1), new Resume(UUID_2, NAME_2), new Resume(UUID_3, NAME_3)},
-                resumes.toArray());
+        assertArrayEquals(new Resume[]{FIRST_RESUME, SECOND_RESUME, THIRD_RESUME}, resumes.toArray());
     }
 }
