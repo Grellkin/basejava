@@ -8,15 +8,13 @@ import java.util.*;
 public class Resume implements Serializable {
 
     private static final long serialVersionUID = 1L;
-
-    private final String uuid;
-    private final String fullName;
-    private final Map<ContactType, String> contacts = new EnumMap<>(ContactType.class);
-    private final Map<SectionType, AbstractSection<?>> sections = new EnumMap<>(SectionType.class);
+    private  String uuid;
+    private  String fullName;
+    private  Map<ContactType, String> contacts = new EnumMap<>(ContactType.class);
+    private  Map<SectionType, AbstractSection> sections = new EnumMap<>(SectionType.class);
     public static final Comparator<Resume> comparatorByUuid = Comparator.comparing(Resume::getUuid);
     public static final Comparator<Resume> comparatorByFullNameAndUuid =
             Comparator.comparing(Resume::getFullName).thenComparing(Resume::getUuid);
-
 
     public Resume(String uuid, String fullName) {
         Objects.requireNonNull(fullName, "Full name should be not null");
@@ -29,7 +27,29 @@ public class Resume implements Serializable {
         this(UUID.randomUUID().toString(), "defaultName");
     }
 
+    public void addContact(ContactType type, String info) {
+        contacts.put(type, info);
+    }
 
+    public void addSection(SectionType type, AbstractSection section) {
+        sections.put(type, section);
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
+
+    public void setContacts(Map<ContactType, String> contacts) {
+        this.contacts = contacts;
+    }
+
+    public void setSections(Map<SectionType, AbstractSection> sections) {
+        this.sections = sections;
+    }
 
     public String getUuid() {
         return uuid;
@@ -43,16 +63,8 @@ public class Resume implements Serializable {
         return contacts;
     }
 
-    public Map<SectionType, AbstractSection<?>> getSections() {
+    public Map<SectionType, AbstractSection> getSections() {
         return sections;
-    }
-
-    public void addContact(ContactType type, String info) {
-        contacts.put(type, info);
-    }
-
-    public void addSection(SectionType type, AbstractSection<?> section) {
-        sections.put(type, section);
     }
 
     @Override

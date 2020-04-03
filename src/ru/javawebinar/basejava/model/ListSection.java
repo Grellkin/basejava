@@ -1,28 +1,53 @@
 package ru.javawebinar.basejava.model;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
-public class ListSection extends AbstractSection<List<String>> {
+@XmlAccessorType(XmlAccessType.FIELD)
+public class ListSection extends AbstractSection {
+
     private static final long serialVersionUID = 1L;
+    private List<String> content;
 
-    public ListSection(List<String> info) {
-        super(info);
+    public ListSection() {
     }
 
-    public ListSection(String...strings){
-        super(Arrays.asList(strings));
+    public ListSection(List<String> content) {
+        this.content = content;
+    }
+
+    public ListSection(String... content) {
+        this.content = Arrays.asList(content);
+    }
+
+    public List<String> getContent() {
+        return content;
+    }
+
+    public void setContent(List<String> content) {
+        this.content = content;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ListSection that = (ListSection) o;
+        return Objects.equals(content, that.content);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(content);
     }
 
     @Override
     public String toString() {
-        StringBuilder strings = new StringBuilder();
-        for (String st :
-                content) {
-            strings.append("--> ").append(st).append("\n");
-        }
-        return strings.toString();
+        return "ListSection{" +
+                "content=" + content +
+                '}';
     }
-
-
 }
