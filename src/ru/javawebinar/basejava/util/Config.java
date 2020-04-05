@@ -8,16 +8,22 @@ import java.nio.file.Paths;
 import java.util.Properties;
 
 public class Config {
+    private static final Path PROPS = Paths.get("config/resume.properties");
+    private static final Properties PROPERTIES = new Properties();
+    private static final Path DIRECTORY;
+    private static final String URL_DB;
+    private static final String USER_DB;
+    private static final String PASS_DB;
     private static final Config CONFIG = new Config();
-    private static final Properties properties = new Properties();
-    private static final Path directory;
-
 
     static {
-        Path confPath = Paths.get("config/resume.properties");
-        try (InputStream inputStream = Files.newInputStream(confPath)) {
-            properties.load(inputStream);
-            directory = Paths.get(properties.getProperty("dir.storage"));
+        //Resume.class.getClassLoader().getResourceAsStream(PROPS.toString());
+        try (InputStream inputStream = Files.newInputStream(PROPS)) {
+            PROPERTIES.load(inputStream);
+            DIRECTORY = Paths.get(PROPERTIES.getProperty("dir.storage"));
+            URL_DB = PROPERTIES.getProperty("db.url");
+            USER_DB = PROPERTIES.getProperty("db.user");
+            PASS_DB = PROPERTIES.getProperty("db.password");
         } catch (IOException e) {
             throw new IllegalStateException("Configuration of app has been broken.", e);
         }
@@ -31,7 +37,19 @@ public class Config {
         return CONFIG;
     }
 
-    public static Path getDirectory() {
-        return directory;
+    public String getUrlDb() {
+        return URL_DB;
+    }
+
+    public String getUserDb() {
+        return USER_DB;
+    }
+
+    public String getPassDb() {
+        return PASS_DB;
+    }
+
+    public Path getDirectory() {
+        return DIRECTORY;
     }
 }

@@ -16,7 +16,7 @@ import static ru.javawebinar.basejava.storage.ResumeTestData.*;
 
 public class AbstractStorageTest {
 
-    protected static final Path storagePath = Config.getDirectory();
+    protected static final Path storagePath = Config.get().getDirectory();
     protected Storage storage;
 
     public AbstractStorageTest(Storage storage) {
@@ -26,8 +26,8 @@ public class AbstractStorageTest {
     @Before
     public void setUp(){
         storage.clear();
-        createContacts();
-        createSections();
+       // createContacts();
+        //createSections();
         storage.save(FIRST_RESUME);
         storage.save(SECOND_RESUME);
         storage.save(THIRD_RESUME);

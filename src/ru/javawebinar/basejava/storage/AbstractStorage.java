@@ -11,7 +11,7 @@ import java.util.List;
 
 public abstract class AbstractStorage<SK> implements Storage {
 
-    private static final Logger log = LogManager.getLogger();
+    private static final Logger log = LogManager.getRootLogger();
 
     @Override
     public Resume get(String uuid) {
