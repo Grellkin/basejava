@@ -49,9 +49,9 @@ public class ResumeTestData {
             new Organization.Position(1834, Month.of(11), "Fighter", "Best fighter");
 
     protected static final Organization ORGANIZATION_1 =
-            new Organization("PANCAKE",null,  POSITION_1, POSITION_3);
+            new Organization("PANCAKE","",  POSITION_1, POSITION_3);
     protected static final Organization ORGANIZATION_2 =
-            new Organization("Heart",null,  POSITION_2);
+            new Organization("Heart","",  POSITION_2);
     protected static final Organization ORGANIZATION_3 =
             new Organization("Dance hill","www.danceHill.com",  POSITION_4);
     protected static final Organization ORGANIZATION_4 =

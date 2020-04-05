@@ -10,7 +10,7 @@ import java.util.Objects;
 public class OrganizationSection extends AbstractSection {
 
     private static final long serialVersionUID = 1L;
-    protected List<Organization> content;
+    private List<Organization> content;
 
     public OrganizationSection() {
     }

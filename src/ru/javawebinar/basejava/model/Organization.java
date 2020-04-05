@@ -1,6 +1,5 @@
 package ru.javawebinar.basejava.model;
 
-
 import ru.javawebinar.basejava.util.LocalDateAdapter;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -34,6 +33,11 @@ public class Organization implements Serializable {
     public Organization(String companyName, String url, Position... positions) {
         this.organizationName = new Link(companyName, url);
         this.positions = Arrays.asList(positions);
+    }
+
+    public Organization(String companyName, String url, List<Position> positions) {
+        this.organizationName = new Link(companyName, url);
+        this.positions = positions;
     }
 
     public void setOrganizationName(Link organizationName) {
@@ -151,6 +155,16 @@ public class Organization implements Serializable {
         @Override
         public int hashCode() {
             return Objects.hash(dateOfStart, dateOfEnd, position, info);
+        }
+
+        @Override
+        public String toString() {
+            return "Position{" +
+                    "dateOfStart=" + dateOfStart +
+                    ", dateOfEnd=" + dateOfEnd +
+                    ", position='" + position + '\'' +
+                    ", info='" + info + '\'' +
+                    '}';
         }
     }
 }

@@ -21,7 +21,7 @@ public class TextSection extends AbstractSection {
         this.content = content;
     }
 
-    public Object getContent() {
+    public String getContent() {
         return content;
     }
 
