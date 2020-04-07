@@ -2,7 +2,6 @@ package ru.javawebinar.basejava.sql;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import ru.javawebinar.basejava.exception.StorageException;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -17,19 +16,33 @@ public class SqlHelper {
         this.factory = factory;
     }
 
-
-    public interface SqlExecutor<T> {
-        T execute(PreparedStatement statement) throws SQLException;
-    }
-
     public <T> T doSQL(String sql, SqlExecutor<T> executor) {
         try (Connection con = factory.getConnection()) {
             PreparedStatement statement = con.prepareStatement(sql);
             return executor.execute(statement);
         } catch (SQLException e) {
             LOGGER.warn("SQL query " + sql + " fall with exception");
-            throw new StorageException("Sorry, some problem with DB.", e);
+            throw ExceptionUtil.convertException(e);
         }
     }
+
+    public <T> T doTransactSQL(SqlTransactionExecutor<T> executor) {
+        try (Connection connection = factory.getConnection()) {
+            try {
+                connection.setAutoCommit(false);
+                T res = executor.execute(connection);
+                connection.commit();
+                return res;
+            } catch (SQLException e) {
+                connection.rollback();
+                throw e;
+            }finally {
+                connection.setAutoCommit(true);
+            }
+        } catch (SQLException e) {
+            throw ExceptionUtil.convertException(e);
+        }
+    }
+
 
 }

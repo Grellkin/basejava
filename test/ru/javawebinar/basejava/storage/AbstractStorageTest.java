@@ -24,9 +24,9 @@ public class AbstractStorageTest {
     }
 
     @Before
-    public void setUp(){
+    public void setUp() {
         storage.clear();
-       // createContacts();
+        createContacts();
         //createSections();
         storage.save(FIRST_RESUME);
         storage.save(SECOND_RESUME);
@@ -42,7 +42,7 @@ public class AbstractStorageTest {
     }
 
     @Test(expected = ExistStorageException.class)
-    public void saveExisting(){
+    public void saveExisting() {
         storage.save(new Resume(UUID_2, NAME_2));
     }
 
@@ -54,7 +54,7 @@ public class AbstractStorageTest {
     }
 
     @Test(expected = NotExistStorageException.class)
-    public void updateAbsent(){
+    public void updateAbsent() {
         storage.update(new Resume("Abra_Cadabra", NAME_1));
     }
 
@@ -66,7 +66,7 @@ public class AbstractStorageTest {
     }
 
     @Test(expected = NotExistStorageException.class)
-    public void getAbsent(){
+    public void getAbsent() {
         storage.get("Abra_Cadabra");
     }
 
@@ -78,7 +78,7 @@ public class AbstractStorageTest {
     }
 
     @Test(expected = NotExistStorageException.class)
-    public void deleteAbsent(){
+    public void deleteAbsent() {
         storage.delete("Abra_cadabra");
     }
 
