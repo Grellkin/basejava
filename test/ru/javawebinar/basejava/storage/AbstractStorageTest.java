@@ -27,7 +27,7 @@ public class AbstractStorageTest {
     public void setUp() {
         storage.clear();
         createContacts();
-        //createSections();
+        createSections();
         storage.save(FIRST_RESUME);
         storage.save(SECOND_RESUME);
         storage.save(THIRD_RESUME);

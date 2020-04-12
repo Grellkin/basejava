@@ -7,6 +7,6 @@ public class SqlStorageTest extends AbstractStorageTest {
     private static final Config config = Config.get();
 
     public SqlStorageTest() {
-        super(new SqlStorage(config.getUrlDb(), config.getUserDb(), config.getPassDb()));
+        super(config.getStorage());
     }
 }

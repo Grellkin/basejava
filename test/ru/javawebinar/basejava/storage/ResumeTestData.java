@@ -67,19 +67,19 @@ public class ResumeTestData {
         FIRST_RESUME.addSection(SectionType.OBJECTIVE, TEXT_SECTION_OBJECTIVE_ONE);
         FIRST_RESUME.addSection(SectionType.ACHIEVEMENT, new ListSection(ACHIEVEMENT_1));
         FIRST_RESUME.addSection(SectionType.QUALIFICATIONS, new ListSection(QUALIFICATION_1));
-        FIRST_RESUME.addSection(SectionType.EXPERIENCE, new OrganizationSection(ORGANIZATION_1));
+//        FIRST_RESUME.addSection(SectionType.EXPERIENCE, new OrganizationSection(ORGANIZATION_1));
 
         SECOND_RESUME.addSection(SectionType.PERSONAL, TEXT_SECTION_PERSONAL_TWO);
         SECOND_RESUME.addSection(SectionType.OBJECTIVE, TEXT_SECTION_OBJECTIVE_TWO);
         SECOND_RESUME.addSection(SectionType.ACHIEVEMENT, new ListSection(ACHIEVEMENT_2));
         SECOND_RESUME.addSection(SectionType.QUALIFICATIONS, new ListSection(QUALIFICATION_2));
-        SECOND_RESUME.addSection(SectionType.EXPERIENCE, new OrganizationSection(ORGANIZATION_2, ORGANIZATION_3));
+//        SECOND_RESUME.addSection(SectionType.EXPERIENCE, new OrganizationSection(ORGANIZATION_2, ORGANIZATION_3));
         
         THIRD_RESUME.addSection(SectionType.PERSONAL, TEXT_SECTION_PERSONAL_THREE);
         THIRD_RESUME.addSection(SectionType.OBJECTIVE, TEXT_SECTION_OBJECTIVE_THREE);
         THIRD_RESUME.addSection(SectionType.ACHIEVEMENT, new ListSection(ACHIEVEMENT_3));
         THIRD_RESUME.addSection(SectionType.QUALIFICATIONS, new ListSection(QUALIFICATION_3));
-        THIRD_RESUME.addSection(SectionType.EXPERIENCE, new OrganizationSection(ORGANIZATION_4, ORGANIZATION_5));
+//        THIRD_RESUME.addSection(SectionType.EXPERIENCE, new OrganizationSection(ORGANIZATION_4, ORGANIZATION_5));
     }
 
     public static void createContacts() {
