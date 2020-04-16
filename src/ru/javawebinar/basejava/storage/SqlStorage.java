@@ -87,7 +87,7 @@ public class SqlStorage implements Storage {
         return helper.doTransactSQL(connection -> {
             List<Resume> resumes = new ArrayList<>();
             try (PreparedStatement statement = connection.prepareStatement(
-                    "SELECT * FROM resume ORDER BY full_name, uuid;")) {
+                    "SELECT * FROM resume ORDER BY uuid;")) {
                 ResultSet set = statement.executeQuery();
                 while (set.next()) {
                     resumes.add(new Resume(set.getString("uuid"), set.getString("full_name")));
@@ -111,6 +111,7 @@ public class SqlStorage implements Storage {
                     addTextSectionsToResume(set, res);
                 }
             }
+            resumes.sort(Resume.comparatorByFullNameAndUuid);
             return resumes;
         });
     }

@@ -1,7 +1,6 @@
 package ru.javawebinar.basejava.web;
 
-import ru.javawebinar.basejava.model.ContactType;
-import ru.javawebinar.basejava.model.Resume;
+import ru.javawebinar.basejava.model.*;
 import ru.javawebinar.basejava.storage.Storage;
 import ru.javawebinar.basejava.util.Config;
 
@@ -10,58 +9,82 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.util.Arrays;
 
 public class ResumeServlet extends HttpServlet {
 
     private Storage storage = Config.get().getStorage();
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        Resume resume;
+        String uuid = request.getParameter("uuid");
+        if (uuid != null && uuid.trim().length() != 0) {
+            resume = new Resume(request.getParameter("uuid"), request.getParameter("fullName"));
+        } else {
+            resume = new Resume();
+            resume.setFullName(request.getParameter("fullName"));
+        }
+
+        for (ContactType type : ContactType.values()) {
+            String value = request.getParameter(type.name());
+            if (value != null && value.trim().length() != 0) {
+                resume.addContact(type, value);
+            } else {
+                resume.getContacts().remove(type);
+            }
+        }
+        for (SectionType type : SectionType.values()) {
+            String value = request.getParameter(type.name());
+            if (value != null && value.trim().length() != 0) {
+                AbstractSection section;
+                switch (type){
+                    case PERSONAL:
+                    case OBJECTIVE:
+                        section = new TextSection(value);
+                        resume.addSection(type, section);
+                        break;
+                    case ACHIEVEMENT:
+                    case QUALIFICATIONS:
+                        section = new ListSection(Arrays.asList(value.split("\n")));
+                        resume.addSection(type, section);
+                        break;
+                    case EXPERIENCE:
+                    case EDUCATION:
+                        break;
+                }
+            } else {
+                resume.getSections().remove(type);
+            }
+        }
+        if (uuid != null && uuid.trim().length() != 0) {
+            storage.update(resume);
+        } else {
+            storage.save(resume);
+        }
+
+        response.sendRedirect("/resume");
     }
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        try(PrintWriter writer = response.getWriter()){
-            writer.println("<!DOCTYPE html>\n" +
-                    "<html lang=\"en\">\n" +
-                    "<head>\n" +
-                    "    <title>HTML Table with a Header, Footer and Body</title>\n" +
-                    "    <style>\n" +
-                    "        table {\n" +
-                    "            width: 300px;\n" +
-                    "            border-collapse: collapse;\n" +
-                    "        }\n" +
-                    "        table, th, td {\n" +
-                    "            border: 1px solid black;\n" +
-                    "        }\n" +
-                    "        th, td {\n" +
-                    "            padding: 10px;\n" +
-                    "            text-align: left;\n" +
-                    "        }\n" +
-                    "    </style>\n" +
-                    "</head>\n" +
-                    "<body>\n" +
-                    "    <table>\n" +
-                    "        <thead>\n" +
-                    "            <tr>\n" +
-                    "                <th>Uuid</th>\n" +
-                    "                <th>Email</th>\n" +
-                    "            </tr>\n" +
-                    "        </thead>\n" +
-                    "        <tbody>\n");
-            for (Resume resume :
-                    storage.getAllSorted()) {
-                String builder = "<tr><td>" +
-                        "<a href=\"resume?uuid="+resume.getUuid()+"\">"+resume.getFullName() + "</a>\n"+
-                        "</td><td>" +
-                        resume.getContacts().get(ContactType.MAIL) +
-                        "</td></tr>";
-                writer.println(builder);
+        String uuid = request.getParameter("uuid");
+        if (uuid != null && uuid.trim().length() != 0) {
+            Resume resume = storage.get(uuid);
+            switch (request.getParameter("action")) {
+                case "view":
+                    request.setAttribute("resume", resume);
+                    getServletContext().getRequestDispatcher("/WEB-INF/jsp/view.jsp").forward(request, response);
+                    break;
+                case "delete":
+                    storage.delete(uuid);
+                    break;
+                case "edit":
+                    request.setAttribute("resume", resume);
+                    getServletContext().getRequestDispatcher("/WEB-INF/jsp/edit.jsp").forward(request, response);
+                    break;
+                default:
             }
-            writer.println("      </tfoot>\n" +
-                    "    </table>\n" +
-                    "</body>\n" +
-                    "</html>");
-            
         }
+        request.setAttribute("resumes", storage.getAllSorted());
+        getServletContext().getRequestDispatcher("/WEB-INF/jsp/list.jsp").forward(request, response);
     }
 }

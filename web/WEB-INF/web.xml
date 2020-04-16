@@ -13,4 +13,15 @@
         <servlet-name>ResumeServlet</servlet-name>
         <url-pattern>/resume</url-pattern>
     </servlet-mapping>
+
+    <servlet>
+        <servlet-name>saveServlet</servlet-name>
+        <jsp-file>/WEB-INF/jsp/add.jsp</jsp-file>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>saveServlet</servlet-name>
+        <url-pattern>/resume/create</url-pattern>
+    </servlet-mapping>
+
 </web-app>
