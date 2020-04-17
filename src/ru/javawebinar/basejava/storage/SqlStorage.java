@@ -9,6 +9,10 @@ import ru.javawebinar.basejava.model.*;
 import ru.javawebinar.basejava.sql.SqlHelper;
 
 import java.sql.*;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.*;
 
 public class SqlStorage implements Storage {
@@ -45,6 +49,7 @@ public class SqlStorage implements Storage {
                 contactStatement.executeBatch();
             }
             insertTextSectionsFromResume(resume, connection, uuid);
+            insertOrganizationsFromResume(resume, connection, uuid);
             return null;
         });
     }
@@ -77,6 +82,19 @@ public class SqlStorage implements Storage {
                 ResultSet set = statement.executeQuery();
                 addTextSectionsToResume(set, resume);
             }
+
+            try (PreparedStatement statement = connection.prepareStatement(
+                    "SELECT p.position, p.start_date, p.end_date, p.organization_name, p.resume_uuid, p.type,p.info, o.url " +
+                            "FROM position p " +
+                            "JOIN organization o ON o.organization_name = p.organization_name " +
+                            "WHERE p.resume_uuid = ?" +
+                            " ORDER BY p.resume_uuid, p.type, p.organization_name", ResultSet.TYPE_SCROLL_INSENSITIVE,
+                    ResultSet.CONCUR_READ_ONLY)) {
+                statement.setString(1, uuid);
+                ResultSet set = statement.executeQuery();
+                addOrgSectionsToResume(set, resume);
+            }
+
             return resume;
         });
     }
@@ -111,9 +129,83 @@ public class SqlStorage implements Storage {
                     addTextSectionsToResume(set, res);
                 }
             }
+
+            try (PreparedStatement statement = connection.prepareStatement(
+                    "SELECT p.position, p.start_date, p.end_date, p.organization_name, p.resume_uuid, p.type, p.info, o.url " +
+                            "FROM position p " +
+                            "JOIN organization o ON o.organization_name = p.organization_name " +
+                            " ORDER BY p.resume_uuid, p.type, p.organization_name", ResultSet.TYPE_SCROLL_INSENSITIVE,
+                    ResultSet.CONCUR_READ_ONLY)) {
+                ResultSet set = statement.executeQuery();
+                for (Resume res :
+                        resumes) {
+                    addOrgSectionsToResume(set, res);
+                }
+            }
+
             resumes.sort(Resume.comparatorByFullNameAndUuid);
             return resumes;
         });
+    }
+
+    private void addOrgSectionsToResume(ResultSet set, Resume resume) throws SQLException {
+        String uuid = resume.getUuid();
+        SectionType currentSection = null;
+        String currentNameOrg = "";
+        Link link;
+        List<Organization> listOrg = null;
+        List<Organization.Position> positionList = null;
+        OrganizationSection section;
+        Organization organization;
+        while (set.next()) {
+            if (!set.getString("resume_uuid").equals(uuid)) {
+                set.previous();
+                return;
+            }
+            SectionType newSection = SectionType.valueOf(set.getString("type"));
+            if (newSection != currentSection) {
+                section = new OrganizationSection();
+                resume.getSections().put(newSection, section);
+                listOrg = new ArrayList<>();
+                section.setContent(listOrg);
+
+                organization = new Organization();
+                listOrg.add(organization);
+
+                link = new Link();
+                organization.setOrganizationName(link);
+                positionList = new ArrayList<>();
+                organization.setPositions(positionList);
+
+                currentSection = newSection;
+
+                link.setName(set.getString("organization_name"));
+                link.setUrl(set.getString("url"));
+                currentNameOrg = set.getString("organization_name");
+            } else if (!set.getString("organization_name").equals(currentNameOrg)) {
+                organization = new Organization();
+                listOrg.add(organization);
+                link = new Link();
+                organization.setOrganizationName(link);
+                positionList = new ArrayList<>();
+                organization.setPositions(positionList);
+
+                currentSection = newSection;
+
+                link.setName(set.getString("organization_name"));
+                link.setUrl(set.getString("url"));
+                currentNameOrg = set.getString("organization_name");
+            }
+            LocalDate start_date = convertToLocalDateViaInstant(set.getDate("start_date"));
+            LocalDate end_date = convertToLocalDateViaInstant(set.getDate("end_date"));
+            positionList.add(new Organization.Position(start_date, end_date, set.getString("position"),
+            set.getString("info")));
+        }
+    }
+    public LocalDate convertToLocalDateViaInstant(Date dateToConvert) {
+        return Instant.ofEpochMilli(dateToConvert.getTime())
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate();
     }
 
     @Override
@@ -146,13 +238,19 @@ public class SqlStorage implements Storage {
                 contactStatement.executeBatch();
             }
 
-            try(PreparedStatement delSectStatement = connection.prepareStatement(
-                    "DELETE FROM text_section WHERE resume_uuid = ?")){
+            try (PreparedStatement delSectStatement = connection.prepareStatement(
+                    "DELETE FROM text_section WHERE resume_uuid = ?")) {
                 delSectStatement.setString(1, uuid);
                 delSectStatement.executeUpdate();
             }
 
             insertTextSectionsFromResume(resume, connection, uuid);
+            try (PreparedStatement delPosStatement = connection.prepareStatement(
+                    "DELETE FROM position WHERE resume_uuid = ?")) {
+                delPosStatement.setString(1, uuid);
+                delPosStatement.executeUpdate();
+            }
+            insertOrganizationsFromResume(resume, connection, uuid);
             return null;
 
 
@@ -164,6 +262,7 @@ public class SqlStorage implements Storage {
     public void clear() {
         LOGGER.info("Delete everything from resume_db");
         helper.doSQL("DELETE FROM resume;", PreparedStatement::executeUpdate);
+        helper.doSQL("DELETE FROM organization;", PreparedStatement::executeUpdate);
     }
 
     @Override
@@ -233,7 +332,7 @@ public class SqlStorage implements Storage {
                 return;
             }
             String value = set.getString("value");
-            if (value != null){
+            if (value != null) {
                 resume.addContact(ContactType.valueOf(set.getString("type")), value);
             }
         }
@@ -260,6 +359,53 @@ public class SqlStorage implements Storage {
             }
         }
     }
+
+    private boolean checkString(String string) {
+        return string != null && string.trim().length() > 0;
+    }
+
+    private void insertOrganizationsFromResume(Resume resume, Connection connection, String uuid) throws SQLException {
+        for (Map.Entry<SectionType, AbstractSection> sectEntry :
+                resume.getSections().entrySet()) {
+            if (sectEntry.getKey().equals(SectionType.EXPERIENCE) || sectEntry.getKey().equals(SectionType.EDUCATION)) {
+                OrganizationSection sect = (OrganizationSection) sectEntry.getValue();
+                try (PreparedStatement preparedStatement = connection.prepareStatement(
+                        "INSERT INTO organization(ORGANIZATION_NAME, URL) VALUES (?, ?) ON CONFLICT DO NOTHING;")) {
+                    for (Organization org :
+                            sect.getContent()) {
+                        Link orgLink = org.getOrganizationName();
+                        if (!checkString(orgLink.getName())) {
+                            throw new StorageException("Organization must contain a name!");
+                        }
+                        preparedStatement.setString(1, orgLink.getName());
+                        preparedStatement.setString(2, orgLink.getUrl());
+                        preparedStatement.addBatch();
+                    }
+                    preparedStatement.executeBatch();
+                }
+                try (PreparedStatement preparedStatement = connection.prepareStatement(
+                        "INSERT INTO position (position,start_date, end_date, organization_name, resume_uuid, type, info) " +
+                                "VALUES (?,?,?,?,?,?,?)")) {
+                    for (Organization org :
+                            sect.getContent()) {
+                        for (Organization.Position pos :
+                                org.getPositions()) {
+                            preparedStatement.setString(1, pos.getPosition());
+                            preparedStatement.setObject(2, pos.getDateOfStart(), Types.DATE);
+                            preparedStatement.setObject(3, pos.getDateOfEnd(), Types.DATE);
+                            preparedStatement.setString(4, org.getOrganizationName().getName());
+                            preparedStatement.setString(5, uuid);
+                            preparedStatement.setString(6, sectEntry.getKey().name());
+                            preparedStatement.setString(7, pos.getInfo());
+                            preparedStatement.addBatch();
+                        }
+                    }
+                    preparedStatement.executeBatch();
+                }
+            }
+        }
+    }
+
 }
 
 

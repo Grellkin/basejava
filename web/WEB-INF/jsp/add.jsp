@@ -13,37 +13,56 @@
 <head>
     <title>All resumes</title>
     <style>
-    header {
-    background: none repeat scroll 0 0 #3de2aa;
-    color: #ebdbb2;
-    font-size: 20px;
-    padding: 5px 20px;
-    }
+        header {
+            background: none repeat scroll 0 0 #3de2aa;
+            color: #ebdbb2;
+            font-size: 20px;
+            padding: 5px 20px;
+        }
 
-    footer {
-    background: none repeat scroll 0 0 #3de2aa;
-    color: #669E73;
-    font-size: 20px;
-    padding: 5px 20px;
-    margin: 20px 0;
-    }
+        footer {
+            background: none repeat scroll 0 0 #3de2aa;
+            color: #669E73;
+            font-size: 20px;
+            padding: 5px 20px;
+            margin: 20px 0;
+        }
+
+        dl {
+            background: none repeat scroll 0 0 #FAFAFA;
+            margin: 8px 0;
+            padding: 0;
+        }
+
+        dt {
+            display: inline-block;
+            width: 170px;
+        }
+
+        dd {
+            display: inline-block;
+            margin-left: 8px;
+            vertical-align: top;
+        }
     </style>
 </head>
 <body>
 <jsp:include page="/WEB-INF/jsp/snippets/header.jsp"></jsp:include>
 <h1>Create resume</h1>
 <form action="/resume" method="post">
-    <label for="fullName"><span>Full Name</span></label>
-    <input type="text" name="fullName" id="fullName"><br><br>
+    <dl>
+        <dt>Full Name</dt>
+        <dd><input type="text" name="fullName" id="fullName"></dd>
+    </dl>
     <c:forEach items="${ContactType.values()}" var="cont">
-        <label>
-                ${cont.title}
-            <input type="text" name="${cont}">
-        </label><br><br>
+        <dl>
+            <dt>${cont.title}</dt>
+            <dd><input type="text" name="${cont}"></dd>
+        </dl>
     </c:forEach>
 
     <h3>Персональная информация</h3>
-       <c:forEach items="${SectionType.values()}" var="sectionName">
+    <c:forEach items="${SectionType.values()}" var="sectionName">
         <h4>${sectionName.title}</h4>
         <jsp:useBean id="sectionName" type="ru.javawebinar.basejava.model.SectionType"/>
         <c:choose>

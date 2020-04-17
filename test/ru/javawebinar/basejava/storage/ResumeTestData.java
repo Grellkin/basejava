@@ -42,16 +42,16 @@ public class ResumeTestData {
     protected static final Organization.Position POSITION_2 =
             new Organization.Position(2012, Month.of(3), "Waiter", "Best waiter");
     protected static final Organization.Position POSITION_3 =
-            new Organization.Position(1884, Month.of(4), "Painter", "Best painter");
+            new Organization.Position(1984, Month.of(4), "Painter", "Best painter");
     protected static final Organization.Position POSITION_4 =
             new Organization.Position(2011, Month.of(5), "Pirate", "Best pirate");
     protected static final Organization.Position POSITION_5 =
-            new Organization.Position(1834, Month.of(11), "Fighter", "Best fighter");
+            new Organization.Position(1999, Month.of(11), "Fighter", "Best fighter");
 
     protected static final Organization ORGANIZATION_1 =
             new Organization("PANCAKE","",  POSITION_1, POSITION_3);
     protected static final Organization ORGANIZATION_2 =
-            new Organization("Heart","",  POSITION_2);
+            new Organization("Heart","someUrl",  POSITION_2);
     protected static final Organization ORGANIZATION_3 =
             new Organization("Dance hill","www.danceHill.com",  POSITION_4);
     protected static final Organization ORGANIZATION_4 =
@@ -67,19 +67,19 @@ public class ResumeTestData {
         FIRST_RESUME.addSection(SectionType.OBJECTIVE, TEXT_SECTION_OBJECTIVE_ONE);
         FIRST_RESUME.addSection(SectionType.ACHIEVEMENT, new ListSection(ACHIEVEMENT_1));
         FIRST_RESUME.addSection(SectionType.QUALIFICATIONS, new ListSection(QUALIFICATION_1));
-//        FIRST_RESUME.addSection(SectionType.EXPERIENCE, new OrganizationSection(ORGANIZATION_1));
+        FIRST_RESUME.addSection(SectionType.EXPERIENCE, new OrganizationSection(ORGANIZATION_1));
 
         SECOND_RESUME.addSection(SectionType.PERSONAL, TEXT_SECTION_PERSONAL_TWO);
         SECOND_RESUME.addSection(SectionType.OBJECTIVE, TEXT_SECTION_OBJECTIVE_TWO);
         SECOND_RESUME.addSection(SectionType.ACHIEVEMENT, new ListSection(ACHIEVEMENT_2));
         SECOND_RESUME.addSection(SectionType.QUALIFICATIONS, new ListSection(QUALIFICATION_2));
-//        SECOND_RESUME.addSection(SectionType.EXPERIENCE, new OrganizationSection(ORGANIZATION_2, ORGANIZATION_3));
+        SECOND_RESUME.addSection(SectionType.EXPERIENCE, new OrganizationSection(ORGANIZATION_2, ORGANIZATION_3));
         
         THIRD_RESUME.addSection(SectionType.PERSONAL, TEXT_SECTION_PERSONAL_THREE);
         THIRD_RESUME.addSection(SectionType.OBJECTIVE, TEXT_SECTION_OBJECTIVE_THREE);
         THIRD_RESUME.addSection(SectionType.ACHIEVEMENT, new ListSection(ACHIEVEMENT_3));
         THIRD_RESUME.addSection(SectionType.QUALIFICATIONS, new ListSection(QUALIFICATION_3));
-//        THIRD_RESUME.addSection(SectionType.EXPERIENCE, new OrganizationSection(ORGANIZATION_4, ORGANIZATION_5));
+        THIRD_RESUME.addSection(SectionType.EXPERIENCE, new OrganizationSection(ORGANIZATION_4, ORGANIZATION_5));
     }
 
     public static void createContacts() {

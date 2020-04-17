@@ -24,28 +24,28 @@
 <jsp:useBean id="resume" scope="request" type="ru.javawebinar.basejava.model.Resume"/>
 <form action="resume" method="post">
     <input type="hidden" name="uuid" value="${resume.uuid}">
-    <label for="fullName"><span>Full Name</span></label>
-    <input type="text" name="fullName" id="fullName" value="${resume.fullName}"><br><br>
+    <dl>
+        <dt>Full Name</dt>
+        <dd><input type="text" name="fullName" id="fullName" value="${resume.fullName}"></dd>
+    </dl>
     <c:forEach items="${ContactType.values()}" var="cont">
-        <label>
-            ${cont.title}
-            <input type="text" name="${cont}" value="${resume.contacts.get(cont)}">
-        </label><br><br>
+        <dl>
+            <dt>${cont.title}</dt>
+            <dd><input type="text" name="${cont}" value="${resume.contacts.get(cont)}"></dd>
+        </dl>
     </c:forEach>
-
     <h3>Персональная информация</h3>
-
-    <c:forEach items="${resume.sections}" var="sect">
-        <c:set var="sectionName" value="${sect.key}"/>
-        <h4>${sectionName.title}</h4>
+    <c:forEach items="${SectionType.values()}" var="sect">
+        <c:set var="resumeSect" value="${resume.sections.get(sect)}"/>
+        <h4>${sect.title}</h4>
         <c:choose>
-            <c:when test="${sectionName.equals(SectionType.PERSONAL) || sectionName.equals(SectionType.OBJECTIVE)}">
-                <p><textarea rows="3" cols="40" name="${sectionName}">${sect.value}</textarea></p>
+            <c:when test="${sect.equals(SectionType.PERSONAL) || sect.equals(SectionType.OBJECTIVE)}">
+                <p><textarea rows="3" cols="40" name="${sect}"><c:if
+                        test="${resumeSect != null}">${resumeSect}</c:if></textarea></p>
             </c:when>
-            <c:when test="${sectionName.equals(SectionType.QUALIFICATIONS) || sectionName.equals(SectionType.ACHIEVEMENT)}">
-                <c:set var="listSec" value="${sect.value}"/>
-                <jsp:useBean id="listSec" type="ru.javawebinar.basejava.model.ListSection"/>
-                <p><textarea rows="3" cols="40" name="${sectionName}"><c:forEach items="${listSec.content}" var="item">${item}</c:forEach></textarea></p>
+            <c:when test="${sect.equals(SectionType.QUALIFICATIONS) || sect.equals(SectionType.ACHIEVEMENT)}">
+                <p><textarea rows="3" cols="40" name="${sect}"> <c:if test="${resumeSect != null}"><c:set var="listSec"
+                                                                                                          value="${resume.sections.get(sect)}"/><jsp:useBean id="listSec" type="ru.javawebinar.basejava.model.ListSection"/><c:forEach items="${listSec.content}" var="item">${item}</c:forEach></c:if></textarea></p>
             </c:when>
         </c:choose>
     </c:forEach>
