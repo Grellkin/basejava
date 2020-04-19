@@ -14,31 +14,23 @@ public abstract class AbstractStorage<SK> implements Storage {
     private static final Logger log = LogManager.getRootLogger();
 
     @Override
-    public Resume get(String uuid) {
-        log.debug("Get resume with uuid = " + uuid);
-        SK searchKey = findSearchKey(uuid);
-        checkAndLog(uuid, searchKey);
-        return getElement(searchKey);
-    }
-
-    @Override
-    public void delete(String uuid) {
-        log.info("Delete resume with uuid = " + uuid);
-        SK searchKey = findSearchKey(uuid);
-        checkAndLog(uuid, searchKey);
-        removeElement(searchKey);
-    }
-
-    @Override
     public void save(Resume resume) {
         String uuid = resume.getUuid();
-//      log.info("Save resume with uuid = " + uuid);
+//      log.info("Save resume with uuid = " + uuid); //временно отключил, мешало колличество записей
         SK searchKey = findSearchKey(uuid);
         if (isElementPresentInStorage(searchKey)) {
             log.warn("Element " + uuid + " already present in storage");
             throw new ExistStorageException(uuid);
         }
         insertElement(searchKey, resume);
+    }
+
+    @Override
+    public Resume get(String uuid) {
+        log.debug("Get resume with uuid = " + uuid);
+        SK searchKey = findSearchKey(uuid);
+        checkAndLog(uuid, searchKey);
+        return getElement(searchKey);
     }
 
     @Override
@@ -51,6 +43,14 @@ public abstract class AbstractStorage<SK> implements Storage {
     }
 
     @Override
+    public void delete(String uuid) {
+        log.info("Delete resume with uuid = " + uuid);
+        SK searchKey = findSearchKey(uuid);
+        checkAndLog(uuid, searchKey);
+        removeElement(searchKey);
+    }
+
+    @Override
     public List<Resume> getAllSorted() {
         List<Resume> list = getCopyOfStorage();
         list.sort(Resume.comparatorByFullNameAndUuid);
@@ -59,22 +59,22 @@ public abstract class AbstractStorage<SK> implements Storage {
 
     private void checkAndLog(String uuid, SK searchKey) {
         if (!isElementPresentInStorage(searchKey)) {
-            log.warn("Element " + uuid + " not present in storage");
+            log.info("Element " + uuid + " not present in storage");
             throw new NotExistStorageException(uuid);
         }
     }
 
-    protected abstract List<Resume> getCopyOfStorage();
-
     protected abstract SK findSearchKey(String uuid);
-
-    protected abstract boolean isElementPresentInStorage(SK searchKey);
-
-    protected abstract Resume getElement(SK searchKey);
-
-    protected abstract void removeElement(SK searchKey);
 
     protected abstract void insertElement(SK searchKey, Resume resume);
 
+    protected abstract Resume getElement(SK searchKey);
+
     protected abstract void updateElement(SK searchKey, Resume resume);
+
+    protected abstract void removeElement(SK searchKey);
+
+    protected abstract List<Resume> getCopyOfStorage();
+
+    protected abstract boolean isElementPresentInStorage(SK searchKey);
 }

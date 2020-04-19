@@ -15,18 +15,13 @@ public class ListStorage extends AbstractStorage<Integer> {
     }
 
     @Override
-    protected Resume getElement(Integer searchKey) {
-        return storage.get(searchKey);
-    }
-
-    @Override
-    protected void removeElement(Integer searchKey) {
-        storage.remove((int) searchKey);
-    }
-
-    @Override
     protected void insertElement(Integer searchKey, Resume resume) {
         storage.add(resume);
+    }
+
+    @Override
+    protected Resume getElement(Integer searchKey) {
+        return storage.get(searchKey);
     }
 
     @Override
@@ -35,9 +30,15 @@ public class ListStorage extends AbstractStorage<Integer> {
     }
 
     @Override
+    protected void removeElement(Integer searchKey) {
+        storage.remove((int) searchKey);
+    }
+
+    @Override
     public void clear() {
         storage.clear();
     }
+
 
     @Override
     protected List<Resume> getCopyOfStorage() {

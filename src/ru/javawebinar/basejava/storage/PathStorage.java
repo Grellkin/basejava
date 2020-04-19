@@ -4,7 +4,9 @@ import ru.javawebinar.basejava.exception.StorageException;
 import ru.javawebinar.basejava.model.Resume;
 import ru.javawebinar.basejava.storage.FIleWR.FileWriterReader;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.IOException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -17,6 +19,7 @@ import java.util.Objects;
 public class PathStorage extends AbstractStorage<Path> {
 
     private Path directory;
+    //pattern Strategy give you a possibility to choose what type of files use and how to store data there
     private FileWriterReader fileWR;
 
     public PathStorage(Path directory, FileWriterReader readerWriter) {
@@ -43,10 +46,31 @@ public class PathStorage extends AbstractStorage<Path> {
     }
 
     @Override
-    protected List<Resume> getCopyOfStorage() {
-        MyWalker walker = new MyWalker(MyWalker.COPY_ALL_PARAM);
-        traverseFileTree(walker);
-        return walker.resumes;
+    protected void insertElement(Path path, Resume resume) {
+        try {
+            Files.createFile(path);
+        } catch (IOException e) {
+            throw new StorageException("IOException while creating file.", getNameOfFile(path), e);
+        }
+        updateElement(path, resume);
+    }
+
+    @Override
+    protected Resume getElement(Path path) {
+        try {
+            return fileWR.readResumeFromFile(new BufferedInputStream(Files.newInputStream(path)));
+        } catch (IOException e) {
+            throw new StorageException("IOException while writing to file.", getNameOfFile(path), e);
+        }
+    }
+
+    @Override
+    protected void updateElement(Path path, Resume resume) {
+        try (BufferedOutputStream os = new BufferedOutputStream(Files.newOutputStream(path))) {
+            fileWR.writeResumeToFile(os, resume);
+        } catch (IOException e) {
+            throw new StorageException("IOException while writing to file.", getNameOfFile(path), e);
+        }
     }
 
     @Override
@@ -59,31 +83,10 @@ public class PathStorage extends AbstractStorage<Path> {
     }
 
     @Override
-    protected void insertElement(Path path, Resume resume) {
-        try {
-            Files.createFile(path);
-        } catch (IOException e) {
-            throw new StorageException("IOException while creating file.", getNameOfFile(path), e);
-        }
-        updateElement(path, resume);
-    }
-
-    @Override
-    protected void updateElement(Path path, Resume resume) {
-        try(BufferedOutputStream os = new BufferedOutputStream(Files.newOutputStream(path))) {
-            fileWR.writeResumeToFile(os, resume);
-        } catch (IOException e) {
-            throw new StorageException("IOException while writing to file.", getNameOfFile(path), e);
-        }
-    }
-
-    @Override
-    protected Resume getElement(Path path) {
-        try {
-            return fileWR.readResumeFromFile(new BufferedInputStream(Files.newInputStream(path)));
-        } catch (IOException e) {
-            throw new StorageException("IOException while writing to file.", getNameOfFile(path), e);
-        }
+    protected List<Resume> getCopyOfStorage() {
+        MyWalker walker = new MyWalker(MyWalker.COPY_ALL_PARAM);
+        traverseFileTree(walker);
+        return walker.resumes;
     }
 
     @Override

@@ -7,6 +7,7 @@ import ru.javawebinar.basejava.exception.NotExistStorageException;
 import ru.javawebinar.basejava.exception.StorageException;
 import ru.javawebinar.basejava.model.*;
 import ru.javawebinar.basejava.sql.SqlHelper;
+import ru.javawebinar.basejava.sql.SqlUtil;
 
 import java.sql.*;
 import java.time.Instant;
@@ -36,7 +37,6 @@ public class SqlStorage implements Storage {
                 if (resumeStatement.executeUpdate() < 1) {
                     throw new ExistStorageException("Sorry, this resume already present in DB");
                 }
-
             }
             try (PreparedStatement contactStatement = connection.prepareStatement(
                     "INSERT INTO contact(type, value, resume_uuid) VALUES (?,?,?);")) {
@@ -57,7 +57,6 @@ public class SqlStorage implements Storage {
     @Override
     public Resume get(String uuid) {
         LOGGER.info("Get resume with uuid = " + uuid + " from resume_db");
-
         return helper.doTransactSQL(connection -> {
             Resume resume;
             try (PreparedStatement statement = connection.prepareStatement(
@@ -76,136 +75,24 @@ public class SqlStorage implements Storage {
                 } while (set.next());
             }
             try (PreparedStatement statement = connection.prepareStatement(
-                    "SELECT type, info, resume_uuid  FROM text_section WHERE resume_uuid = ?", ResultSet.TYPE_SCROLL_INSENSITIVE,
-                    ResultSet.CONCUR_READ_ONLY)) {
+                    "SELECT type, info, resume_uuid  FROM text_section WHERE resume_uuid = ?",
+                    ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY)) {
                 statement.setString(1, uuid);
                 ResultSet set = statement.executeQuery();
                 addTextSectionsToResume(set, resume);
             }
-
             try (PreparedStatement statement = connection.prepareStatement(
                     "SELECT p.position, p.start_date, p.end_date, p.organization_name, p.resume_uuid, p.type,p.info, o.url " +
                             "FROM position p " +
                             "JOIN organization o ON o.organization_name = p.organization_name " +
-                            "WHERE p.resume_uuid = ?" +
-                            " ORDER BY p.resume_uuid, p.type, p.organization_name", ResultSet.TYPE_SCROLL_INSENSITIVE,
-                    ResultSet.CONCUR_READ_ONLY)) {
+                            "WHERE p.resume_uuid = ? " +
+                            "ORDER BY p.resume_uuid, p.type, p.organization_name",
+                    ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY)) {
                 statement.setString(1, uuid);
-                ResultSet set = statement.executeQuery();
-                addOrgSectionsToResume(set, resume);
+                addOrgSectionsToResume(statement.executeQuery(), resume);
             }
-
             return resume;
         });
-    }
-
-    @Override
-    public List<Resume> getAllSorted() {
-        LOGGER.info("Get all resumes from resume_db");
-        return helper.doTransactSQL(connection -> {
-            List<Resume> resumes = new ArrayList<>();
-            try (PreparedStatement statement = connection.prepareStatement(
-                    "SELECT * FROM resume ORDER BY uuid;")) {
-                ResultSet set = statement.executeQuery();
-                while (set.next()) {
-                    resumes.add(new Resume(set.getString("uuid"), set.getString("full_name")));
-                }
-            }
-            try (PreparedStatement statement = connection.prepareStatement(
-                    "SELECT type, value, resume_uuid FROM contact ORDER BY resume_uuid;", ResultSet.TYPE_SCROLL_INSENSITIVE,
-                    ResultSet.CONCUR_READ_ONLY)) {
-                ResultSet set = statement.executeQuery();
-                for (Resume res :
-                        resumes) {
-                    addContactsToResume(set, res);
-                }
-            }
-            try (PreparedStatement statement = connection.prepareStatement(
-                    "SELECT type, info, resume_uuid FROM text_section ORDER BY resume_uuid;", ResultSet.TYPE_SCROLL_INSENSITIVE,
-                    ResultSet.CONCUR_READ_ONLY)) {
-                ResultSet set = statement.executeQuery();
-                for (Resume res :
-                        resumes) {
-                    addTextSectionsToResume(set, res);
-                }
-            }
-
-            try (PreparedStatement statement = connection.prepareStatement(
-                    "SELECT p.position, p.start_date, p.end_date, p.organization_name, p.resume_uuid, p.type, p.info, o.url " +
-                            "FROM position p " +
-                            "JOIN organization o ON o.organization_name = p.organization_name " +
-                            " ORDER BY p.resume_uuid, p.type, p.organization_name", ResultSet.TYPE_SCROLL_INSENSITIVE,
-                    ResultSet.CONCUR_READ_ONLY)) {
-                ResultSet set = statement.executeQuery();
-                for (Resume res :
-                        resumes) {
-                    addOrgSectionsToResume(set, res);
-                }
-            }
-
-            resumes.sort(Resume.comparatorByFullNameAndUuid);
-            return resumes;
-        });
-    }
-
-    private void addOrgSectionsToResume(ResultSet set, Resume resume) throws SQLException {
-        String uuid = resume.getUuid();
-        SectionType currentSection = null;
-        String currentNameOrg = "";
-        Link link;
-        List<Organization> listOrg = null;
-        List<Organization.Position> positionList = null;
-        OrganizationSection section;
-        Organization organization;
-        while (set.next()) {
-            if (!set.getString("resume_uuid").equals(uuid)) {
-                set.previous();
-                return;
-            }
-            SectionType newSection = SectionType.valueOf(set.getString("type"));
-            if (newSection != currentSection) {
-                section = new OrganizationSection();
-                resume.getSections().put(newSection, section);
-                listOrg = new ArrayList<>();
-                section.setContent(listOrg);
-
-                organization = new Organization();
-                listOrg.add(organization);
-
-                link = new Link();
-                organization.setOrganizationName(link);
-                positionList = new ArrayList<>();
-                organization.setPositions(positionList);
-
-                currentSection = newSection;
-
-                link.setName(set.getString("organization_name"));
-                link.setUrl(set.getString("url"));
-                currentNameOrg = set.getString("organization_name");
-            } else if (!set.getString("organization_name").equals(currentNameOrg)) {
-                organization = new Organization();
-                listOrg.add(organization);
-                link = new Link();
-                organization.setOrganizationName(link);
-                positionList = new ArrayList<>();
-                organization.setPositions(positionList);
-
-                currentSection = newSection;
-
-                link.setName(set.getString("organization_name"));
-                link.setUrl(set.getString("url"));
-                currentNameOrg = set.getString("organization_name");
-            }
-            LocalDate start_date = convertToLocalDateViaInstant(set.getDate("start_date"));
-            LocalDate end_date = convertToLocalDateViaInstant(set.getDate("end_date"));
-            positionList.add(new Organization.Position(start_date, end_date, set.getString("position"),
-            set.getString("info")));
-        }
-    }
-    public LocalDate convertToLocalDateViaInstant(Date dateToConvert) {
-        return Instant.ofEpochMilli(dateToConvert.getTime())
-                .atZone(ZoneId.systemDefault())
-                .toLocalDate();
     }
 
     @Override
@@ -221,6 +108,7 @@ public class SqlStorage implements Storage {
                     throw new NotExistStorageException("Sorry, this resume does not present in DB");
                 }
             }
+            //one way is update and insert if it`s nothing to update
             try (PreparedStatement contactStatement = connection.prepareStatement(
                     "INSERT INTO contact(resume_uuid, type, value)\n" +
                             "VALUES (?,?,?)\n" +
@@ -237,13 +125,12 @@ public class SqlStorage implements Storage {
                 }
                 contactStatement.executeBatch();
             }
-
+            //another way is delete and then update
             try (PreparedStatement delSectStatement = connection.prepareStatement(
                     "DELETE FROM text_section WHERE resume_uuid = ?")) {
                 delSectStatement.setString(1, uuid);
                 delSectStatement.executeUpdate();
             }
-
             insertTextSectionsFromResume(resume, connection, uuid);
             try (PreparedStatement delPosStatement = connection.prepareStatement(
                     "DELETE FROM position WHERE resume_uuid = ?")) {
@@ -252,10 +139,50 @@ public class SqlStorage implements Storage {
             }
             insertOrganizationsFromResume(resume, connection, uuid);
             return null;
-
-
         });
 
+    }
+
+    @Override
+    public void delete(String uuid) {
+        LOGGER.info("Delete resume with uuid = " + uuid + " from resume_db");
+        helper.<Void>doSQL("DELETE FROM resume WHERE uuid = ?;", statement -> {
+            statement.setString(1, uuid);
+            if (statement.executeUpdate() < 1) {
+                throw new NotExistStorageException("No resume with uuid = " + uuid + " found in DB");
+            }
+            return null;
+        });
+    }
+
+    @Override
+    public List<Resume> getAllSorted() {
+        LOGGER.info("Get all resumes from resume_db");
+        return helper.doTransactSQL(connection -> {
+            List<Resume> resumes = new ArrayList<>();
+            try (PreparedStatement statement = connection.prepareStatement(
+                    "SELECT * FROM resume ORDER BY uuid;")) {
+                ResultSet set = statement.executeQuery();
+                while (set.next()) {
+                    resumes.add(new Resume(set.getString("uuid"), set.getString("full_name")));
+                }
+            }
+            doPartOfTransaction(resumes, "SELECT type, value, resume_uuid FROM contact ORDER BY resume_uuid;",
+                    connection, this::addContactsToResume);
+
+            doPartOfTransaction(resumes, "SELECT type, info, resume_uuid FROM text_section ORDER BY resume_uuid;",
+                    connection, this::addTextSectionsToResume);
+
+            doPartOfTransaction(resumes,
+                    "SELECT p.position, p.start_date, p.end_date, p.organization_name, p.resume_uuid, p.type, p.info, o.url " +
+                            "FROM position p " +
+                            "JOIN organization o ON o.organization_name = p.organization_name " +
+                            "ORDER BY p.resume_uuid, p.type, p.organization_name",
+                    connection, this::addOrgSectionsToResume);
+
+            resumes.sort(Resume.comparatorByFullNameAndUuid);
+            return resumes;
+        });
     }
 
     @Override
@@ -271,22 +198,41 @@ public class SqlStorage implements Storage {
         return helper.doSQL("SELECT count(*) FROM resume;", statement -> {
             ResultSet set = statement.executeQuery();
             if (!set.next()) {
-                throw new StorageException("There is no resume with such uuid in DB");
+                return 0;
             }
             return set.getInt(1);
         });
     }
 
-    @Override
-    public void delete(String uuid) {
-        LOGGER.info("Delete resume with uuid = " + uuid + " from resume_db");
-        helper.<Void>doSQL("DELETE FROM resume WHERE uuid = ?;", statement -> {
-            statement.setString(1, uuid);
-            if (statement.executeUpdate() < 1) {
-                throw new NotExistStorageException("No resume with uuid = " + uuid + " found in DB");
+
+    private void doPartOfTransaction(List<Resume> resumes, String sql, Connection connection, SqlUtil util) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement(sql,
+                ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY)) {
+            ResultSet set = statement.executeQuery();
+            for (Resume res : resumes) {
+                util.doSqlAction(set, res);
             }
-            return null;
+        }
+    }
+
+    private void addContactsToResume(ResultSet set, Resume resume) throws SQLException {
+        execute(set, resume, (setO, resumeO) -> {
+            String value = set.getString("value");
+            if (value != null) {
+                resume.addContact(ContactType.valueOf(set.getString("type")), value);
+            }
         });
+    }
+
+    private void execute(ResultSet set, Resume resume, SqlUtil util) throws SQLException {
+        String uuid = resume.getUuid();
+        while (set.next()) {
+            if (!set.getString("resume_uuid").equals(uuid)) {
+                set.previous();
+                return;
+            }
+            util.doSqlAction(set, resume);
+        }
     }
 
     private void insertTextSectionsFromResume(Resume resume, Connection connection, String uuid) throws SQLException {
@@ -317,57 +263,61 @@ public class SqlStorage implements Storage {
         }
     }
 
-    private void addCont(ResultSet set, Resume resume) throws SQLException {
-        String value = set.getString("value");
-        if (value != null) {
-            resume.addContact(ContactType.valueOf(set.getString("type")), value);
-        }
-    }
-
-    private void addContactsToResume(ResultSet set, Resume resume) throws SQLException {
-        String uuid = resume.getUuid();
-        while (set.next()) {
-            if (!(set.getString("resume_uuid").equals(uuid))) {
-                set.previous();
-                return;
-            }
-            String value = set.getString("value");
-            if (value != null) {
-                resume.addContact(ContactType.valueOf(set.getString("type")), value);
-            }
-        }
-    }
-
     private void addTextSectionsToResume(ResultSet set, Resume resume) throws SQLException {
-        String uuid = resume.getUuid();
-        while (set.next()) {
-            if (!set.getString("resume_uuid").equals(uuid)) {
-                set.previous();
-                return;
-            }
+        execute(set, resume, (setO, resumeO) -> {
             SectionType type = SectionType.valueOf(set.getString("type"));
             switch (type) {
                 case PERSONAL:
                 case OBJECTIVE:
-                    resume.addSection(type, new TextSection(set.getString("info")));
+                    resumeO.addSection(type, new TextSection(setO.getString("info")));
                     break;
                 case ACHIEVEMENT:
                 case QUALIFICATIONS:
-                    List<String> list = Arrays.asList(set.getString("info").split("\n"));
-                    resume.addSection(type, new ListSection(list));
+                    List<String> list = Arrays.asList(setO.getString("info").split("\n"));
+                    resumeO.addSection(type, new ListSection(list));
                     break;
             }
-        }
+        });
     }
 
     private boolean checkString(String string) {
         return string != null && string.trim().length() > 0;
     }
 
+    private void addOrgSectionsToResume(ResultSet set, Resume resume) throws SQLException {
+        String uuid = resume.getUuid();
+        SectionType currentSectionType = null;
+        String currentNameOrg = "";
+        EmptyOrgSectEntity emptyOrgSectEntity = null;
+        while (set.next()) {
+            if (!set.getString("resume_uuid").equals(uuid)) {
+                set.previous();
+                return;
+            }
+            SectionType newSectionType = SectionType.valueOf(set.getString("type"));
+            if (newSectionType != currentSectionType || !set.getString("organization_name").equals(currentNameOrg)) {
+                if (newSectionType != currentSectionType){
+                    emptyOrgSectEntity = new EmptyOrgSectEntity();
+                    resume.getSections().put(newSectionType, emptyOrgSectEntity.section);
+                }
+                currentSectionType = newSectionType;
+                emptyOrgSectEntity.reInit();
+                emptyOrgSectEntity.link.setName(set.getString("organization_name"));
+                emptyOrgSectEntity.link.setUrl(set.getString("url"));
+                currentNameOrg = set.getString("organization_name");
+            }
+            LocalDate start_date = convertToLocalDateViaInstant(set.getDate("start_date"));
+            LocalDate end_date = convertToLocalDateViaInstant(set.getDate("end_date"));
+            emptyOrgSectEntity.positionList.add(new Organization.Position(start_date, end_date, set.getString("position"),
+                    set.getString("info")));
+        }
+    }
+
     private void insertOrganizationsFromResume(Resume resume, Connection connection, String uuid) throws SQLException {
         for (Map.Entry<SectionType, AbstractSection> sectEntry :
                 resume.getSections().entrySet()) {
-            if (sectEntry.getKey().equals(SectionType.EXPERIENCE) || sectEntry.getKey().equals(SectionType.EDUCATION)) {
+            SectionType sectionType = sectEntry.getKey();
+            if (sectionType.equals(SectionType.EXPERIENCE) || sectionType.equals(SectionType.EDUCATION)) {
                 OrganizationSection sect = (OrganizationSection) sectEntry.getValue();
                 try (PreparedStatement preparedStatement = connection.prepareStatement(
                         "INSERT INTO organization(ORGANIZATION_NAME, URL) VALUES (?, ?) ON CONFLICT DO NOTHING;")) {
@@ -404,6 +354,19 @@ public class SqlStorage implements Storage {
                 }
             }
         }
+    }
+
+    private void addCont(ResultSet set, Resume resume) throws SQLException {
+        String value = set.getString("value");
+        if (value != null) {
+            resume.addContact(ContactType.valueOf(set.getString("type")), value);
+        }
+    }
+
+    private LocalDate convertToLocalDateViaInstant(Date dateToConvert) {
+        return Instant.ofEpochMilli(dateToConvert.getTime())
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate();
     }
 
 }

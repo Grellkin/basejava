@@ -16,12 +16,6 @@ public class ArrayStorage extends AbstractArrayStorage {
     }
 
     @Override
-    protected void removeResume(int index) {
-        storage[index] = storage[size() - 1];
-        storage[--cursor] = null;
-    }
-
-    @Override
     protected Integer findSearchKey(String uuid) {
         for (int i = 0; i < size(); i++) {
             if (storage[i].getUuid().equals(uuid)) {
@@ -29,6 +23,12 @@ public class ArrayStorage extends AbstractArrayStorage {
             }
         }
         return -1;
+    }
+
+    @Override
+    protected void removeElement(Integer searchKey) {
+        storage[searchKey] = storage[size() - 1];
+        storage[--cursor] = null;
     }
 
     @Override

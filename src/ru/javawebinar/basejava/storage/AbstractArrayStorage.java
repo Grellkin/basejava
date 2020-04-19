@@ -11,7 +11,6 @@ public abstract class AbstractArrayStorage extends AbstractStorage<Integer> {
     protected Resume[] storage = new Resume[STORAGE_LIMIT];
     protected int cursor;
 
-
     @Override
     protected boolean isElementPresentInStorage(Integer searchKey) {
         return (searchKey >= 0);
@@ -20,11 +19,6 @@ public abstract class AbstractArrayStorage extends AbstractStorage<Integer> {
     @Override
     protected Resume getElement(Integer searchKey) {
         return storage[searchKey];
-    }
-
-    @Override
-    protected void removeElement(Integer searchKey) {
-        removeResume(searchKey);
     }
 
     @Override
@@ -52,9 +46,6 @@ public abstract class AbstractArrayStorage extends AbstractStorage<Integer> {
     }
 
     protected abstract void insertResume(int index, Resume r);
-
-    protected abstract void removeResume(int index);
-
 
 }
 
