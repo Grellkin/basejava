@@ -34,10 +34,9 @@ public class SqlHelper {
                 connection.commit();
                 return res;
             } catch (SQLException e) {
+                LOGGER.warn("Transaction fall with exception");
                 connection.rollback();
                 throw e;
-            }finally {
-                connection.setAutoCommit(true);
             }
         } catch (SQLException e) {
             throw ExceptionUtil.convertException(e);

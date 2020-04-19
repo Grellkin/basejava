@@ -1,6 +1,7 @@
 package ru.javawebinar.basejava.model;
 
 public enum ContactType {
+
     PHONE("Тел."),
     MOBILE("Мобильный"),
     HOME_PHONE("Домашний тел."),

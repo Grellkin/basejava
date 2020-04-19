@@ -8,16 +8,15 @@
   Time: 15:18
   To change this template use File | Settings | File Templates.
 --%>
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8"%>
 <html>
 <head>
     <title>All resumes</title>
     <link rel="stylesheet" href="css/tableStyle.css">
 </head>
 <body>
-<jsp:include page="snippets/header.jsp"></jsp:include>
-<h1>Resume manager</h1>
-<a href="/resume/create">Create resume<img src="images/add.png" alt="Add new Resume" width="40dp" height="40dp"></a>
+<jsp:include page="snippets/header.jsp"/>
+<h2>All resumes&nbsp<a href="/resume?uuid=createUUID&action=edit"><img src="images/add.png" alt="Add new Resume" width="20dp" height="20dp"></a></h2>
 <table>
     <thead>
     <tr>
@@ -35,18 +34,18 @@
                 <a href="resume?uuid=${resume.uuid}&action=view">${resume.fullName}</a>
             </td>
             <td>
-                ${resume.contacts.get(ContactType.MAIL)}
+                <a href="${resume.contacts.get(ContactType.MAIL)}">${resume.contacts.get(ContactType.MAIL)}</a>
             </td>
             <td>
-                <a href="resume?uuid=${resume.uuid}&action=delete"><img src="images/delete.png" width="25dp" height="25dp"></a>
+                <a href="resume?uuid=${resume.uuid}&action=delete"><img src="images/delete.png" alt="delete" width="25dp" height="25dp"></a>
             </td>
             <td>
-                <a href="resume?uuid=${resume.uuid}&action=edit"><img src="images/edit.png" width="25dp" height="25dp"></a>
+                <a href="resume?uuid=${resume.uuid}&action=edit"><img src="images/edit.png" alt="edit"  width="25dp" height="25dp"></a>
             </td>
         </tr>
     </c:forEach>
     </tbody>
 </table>
-<jsp:include page="snippets/footer.jsp"></jsp:include>
+<jsp:include page="snippets/footer.jsp"/>
 </body>
 </html>

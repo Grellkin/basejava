@@ -7,24 +7,25 @@ import java.util.*;
 @XmlRootElement
 public class Resume implements Serializable {
 
-    private static final long serialVersionUID = 1L;
-    private  String uuid;
-    private  String fullName;
-    private  Map<ContactType, String> contacts = new EnumMap<>(ContactType.class);
-    private  Map<SectionType, AbstractSection> sections = new EnumMap<>(SectionType.class);
+    private static final long serialVersionUID = 4L;
+    private String uuid;
+    private String fullName;
+    private Map<ContactType, String> contacts = new EnumMap<>(ContactType.class);
+    private Map<SectionType, AbstractSection> sections = new EnumMap<>(SectionType.class);
+
     public static final Comparator<Resume> comparatorByUuid = Comparator.comparing(Resume::getUuid);
     public static final Comparator<Resume> comparatorByFullNameAndUuid =
             Comparator.comparing(Resume::getFullName).thenComparing(Resume::getUuid);
+
+    public Resume() {
+        this(UUID.randomUUID().toString(), "defaultName");
+    }
 
     public Resume(String uuid, String fullName) {
         Objects.requireNonNull(fullName, "Full name should be not null");
         Objects.requireNonNull(uuid, "Uuid should be not null");
         this.uuid = uuid;
         this.fullName = fullName;
-    }
-
-    public Resume() {
-        this(UUID.randomUUID().toString(), "defaultName");
     }
 
     public void addContact(ContactType type, String info) {

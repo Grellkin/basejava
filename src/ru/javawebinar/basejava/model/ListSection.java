@@ -9,7 +9,7 @@ import java.util.Objects;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class ListSection extends AbstractSection {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 4L;
     private List<String> content;
 
     public ListSection() {

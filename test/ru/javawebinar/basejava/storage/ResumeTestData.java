@@ -38,11 +38,11 @@ public class ResumeTestData {
     protected static final List<String> QUALIFICATION_3 = Arrays.asList("Qualification of third person.", "Another achiev");
 
     protected static final Organization.Position POSITION_1 =
-            new Organization.Position(1999, Month.of(2), "Cook", "Best cook");
+            new Organization.Position(1999, Month.of(2), 2011, Month.of(6), "Cook", "Best cook");
     protected static final Organization.Position POSITION_2 =
             new Organization.Position(2012, Month.of(3), "Waiter", "Best waiter");
     protected static final Organization.Position POSITION_3 =
-            new Organization.Position(1984, Month.of(4), "Painter", "Best painter");
+            new Organization.Position(1984, Month.of(4), 2019, Month.of(3),"Painter", "Best painter");
     protected static final Organization.Position POSITION_4 =
             new Organization.Position(2011, Month.of(5), "Pirate", "Best pirate");
     protected static final Organization.Position POSITION_5 =

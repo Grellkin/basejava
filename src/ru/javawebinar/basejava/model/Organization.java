@@ -18,7 +18,7 @@ import static ru.javawebinar.basejava.util.DateUtil.of;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Organization implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 4L;
     private Link organizationName;
     private List<Position> positions;
 

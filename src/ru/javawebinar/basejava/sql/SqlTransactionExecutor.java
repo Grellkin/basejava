@@ -6,4 +6,4 @@ import java.sql.SQLException;
 @FunctionalInterface
 public interface SqlTransactionExecutor<T> {
     T execute(Connection connection) throws SQLException;
-}
+        }

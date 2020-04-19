@@ -11,21 +11,22 @@ import java.nio.file.Paths;
 import java.util.Properties;
 
 public class Config {
-    private static final Path PROPS = Paths.get(getHomeDir()+"/config/resume.properties");
+
+    private static final Path PROPS = getHomeDir().resolve("config/resume.properties");
     private static final Properties PROPERTIES = new Properties();
-    private static final Path DIRECTORY;
-    private static final Config CONFIG = new Config();
+    private static final Path PATH_STORAGE;
     private static Storage storage;
+    private static final Config CONFIG = new Config();
 
     static {
         //Resume.class.getClassLoader().getResourceAsStream(PROPS.toString());
         try (InputStream inputStream = Files.newInputStream(PROPS)) {
             PROPERTIES.load(inputStream);
-            DIRECTORY = Paths.get(PROPERTIES.getProperty("dir.storage"));
+            PATH_STORAGE = Paths.get(PROPERTIES.getProperty("dir.storage"));
             Class.forName("org.postgresql.Driver");
             storage = new SqlStorage(PROPERTIES.getProperty("db.url"),
                     PROPERTIES.getProperty("db.user"), PROPERTIES.getProperty("db.password"));
-        } catch (IOException|ClassNotFoundException e) {
+        } catch (IOException | ClassNotFoundException e) {
             throw new IllegalStateException("Configuration of app has been broken.", e);
         }
     }
@@ -39,18 +40,18 @@ public class Config {
     }
 
     public Path getDirectory() {
-        return DIRECTORY;
+        return PATH_STORAGE;
     }
 
     public Storage getStorage() {
         return storage;
     }
 
-    private static String getHomeDir(){
+    private static Path getHomeDir() {
         Path path = Paths.get(System.getProperty("homeDir"));
-        if (!Files.isDirectory(path)){
-            throw new IllegalStateException("Path "+path.toString()+" is not a directory.");
+        if (!Files.isDirectory(path)) {
+            throw new IllegalStateException("Path " + path.toString() + " is not a directory.");
         }
-        return path.toString();
+        return path;
     }
 }
