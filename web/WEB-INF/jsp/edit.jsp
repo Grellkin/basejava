@@ -12,7 +12,7 @@
 <html>
 <head>
     <title>Editing resume</title>
-    <link rel="stylesheet" href="css/tableStyle.css">
+    <link rel="stylesheet" href="resources/css/tableStyle.css">
 </head>
 <body>
 <jsp:include page="snippets/header.jsp"/>

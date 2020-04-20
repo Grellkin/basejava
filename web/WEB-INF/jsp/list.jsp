@@ -10,11 +10,11 @@
 <html>
 <head>
     <title>All resumes</title>
-    <link rel="stylesheet" href="css/tableStyle.css">
+    <link rel="stylesheet" href="resources/css/tableStyle.css">
 </head>
 <body>
 <jsp:include page="snippets/header.jsp"/>
-<h2>All resumes&nbsp<a href="/resume?uuid=createUUID&action=edit"><img src="images/add.png" alt="Add new Resume"
+<h2>All resumes&nbsp<a href="/resume?uuid=createUUID&action=edit"><img src="resources/images/add.png" alt="Add new Resume"
                                                                        width="20dp" height="20dp"></a></h2>
 <table>
     <thead>
@@ -36,11 +36,11 @@
                 <a href="${resume.contacts.get(ContactType.MAIL)}">${resume.contacts.get(ContactType.MAIL)}</a>
             </td>
             <td>
-                <a href="resume?uuid=${resume.uuid}&action=delete"><img src="images/delete.png" alt="delete"
+                <a href="resume?uuid=${resume.uuid}&action=delete"><img src="resources/images/delete.png" alt="delete"
                                                                         width="25dp" height="25dp"></a>
             </td>
             <td>
-                <a href="resume?uuid=${resume.uuid}&action=edit"><img src="images/edit.png" alt="edit" width="25dp"
+                <a href="resume?uuid=${resume.uuid}&action=edit"><img src="resources/images/edit.png" alt="edit" width="25dp"
                                                                       height="25dp"></a>
             </td>
         </tr>

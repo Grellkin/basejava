@@ -11,12 +11,12 @@
 <html>
 <head>
     <title>View of resume</title>
-    <link rel="stylesheet" href="css/tableStyle.css">
+    <link rel="stylesheet" href="resources/css/tableStyle.css">
 </head>
 <body>
 <jsp:include page="snippets/header.jsp"/>
 <jsp:useBean id="resume" scope="request" type="ru.javawebinar.basejava.model.Resume"/>
-<h2>${resume.fullName}&nbsp;<a href="resume?uuid=${resume.uuid}&action=edit"><img src="images/edit.png"
+<h2>${resume.fullName}&nbsp;<a href="resume?uuid=${resume.uuid}&action=edit"><img src="resources/images/edit.png"
                                                                                   alt="Create new resume" width="20dp"
                                                                                   height="20dp"></a></h2>
 <address>
