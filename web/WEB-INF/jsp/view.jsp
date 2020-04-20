@@ -29,16 +29,15 @@
 <c:forEach items="${resume.sections}" var="sect">
 <c:set var="sectionType" value="${sect.key}"/>
 <h4>${sectionType.title}</h4>
-<p>
     <c:choose>
     <c:when test="${sectionType.equals(SectionType.PERSONAL) || sectionType.equals(SectionType.OBJECTIVE)}">
-        ${sect.value}
+        <div style="margin-left: 50px"> ${sect.value}</div>
     </c:when>
     <c:when test="${sectionType.equals(SectionType.QUALIFICATIONS) || sectionType.equals(SectionType.ACHIEVEMENT)}">
         <c:set var="listSec" value="${sect.value}"/>
         <jsp:useBean id="listSec" type="ru.javawebinar.basejava.model.ListSection"/>
     <c:forEach items="${listSec.content}" var="item">
-<li>${item}</li>
+        <div style="margin-left: 50px"><li>${item}</li></div>
 </c:forEach>
 </c:when>
 
