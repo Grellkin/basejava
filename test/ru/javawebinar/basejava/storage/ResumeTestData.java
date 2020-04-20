@@ -33,9 +33,9 @@ public class ResumeTestData {
     protected static final List<String> ACHIEVEMENT_2 = Arrays.asList("Achievement of second person.", "Another achiev");
     protected static final List<String> ACHIEVEMENT_3 = Arrays.asList("Achievement of second person.", "Another achiev");
 
-    protected static final List<String> QUALIFICATION_1 = Arrays.asList("Qualification of first person.", "Another achiev");
-    protected static final List<String> QUALIFICATION_2 = Arrays.asList("Qualification of second person.", "Another achiev");
-    protected static final List<String> QUALIFICATION_3 = Arrays.asList("Qualification of third person.", "Another achiev");
+    protected static final List<String> QUALIFICATION_1 = Arrays.asList("Qualification of first person.", "\nAnother achiev");
+    protected static final List<String> QUALIFICATION_2 = Arrays.asList("Qualification of second person.", "\nAnother achiev");
+    protected static final List<String> QUALIFICATION_3 = Arrays.asList("Qualification of third person.", "\nAnother achiev");
 
     protected static final Organization.Position POSITION_1 =
             new Organization.Position(1999, Month.of(2), 2011, Month.of(6), "Cook", "Best cook");

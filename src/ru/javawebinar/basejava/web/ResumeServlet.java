@@ -1,15 +1,16 @@
 package ru.javawebinar.basejava.web;
 
 import ru.javawebinar.basejava.model.*;
+import ru.javawebinar.basejava.storage.EmptyOrgSectEntity;
 import ru.javawebinar.basejava.storage.Storage;
 import ru.javawebinar.basejava.util.Config;
+import ru.javawebinar.basejava.util.DateUtil;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -23,7 +24,7 @@ public class ResumeServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         Resume resume;
         String uuid = request.getParameter("uuid");
-        if (uuid != null && uuid.trim().length() != 0) {
+        if (isNotEmpty(uuid) && !uuid.equals("createUUID")) {
             resume = new Resume(request.getParameter("uuid"), request.getParameter("fullName"));
         } else {
             resume = new Resume();
@@ -32,7 +33,7 @@ public class ResumeServlet extends HttpServlet {
 
         for (ContactType type : ContactType.values()) {
             String value = request.getParameter(type.name());
-            if (value != null && value.trim().length() != 0) {
+            if (isNotEmpty(value)) {
                 resume.addContact(type, value);
             } else {
                 resume.getContacts().remove(type);
@@ -41,7 +42,7 @@ public class ResumeServlet extends HttpServlet {
 
         for (SectionType type : SectionType.values()) {
             String value = request.getParameter(type.name());
-            if (value != null && value.trim().length() != 0) {
+            if (isNotEmpty(value)) {
                 AbstractSection section;
                 switch (type){
                     case PERSONAL:
@@ -71,7 +72,8 @@ public class ResumeServlet extends HttpServlet {
                                 for (int j = 0; j < titles.length; j++) {
                                     if (isNotEmpty(titles[j])) {
                                         positions.add(new Organization.Position(
-                                                LocalDate.parse(startDates[j]), LocalDate.parse(endDates[j]), titles[j], descriptions[j] ));
+                                                DateUtil.checkStartDateAndSet(startDates[j]),
+                                                DateUtil.checkEndDateAndSet(endDates[j]), titles[j], descriptions[j] ));
                                     }
                                 }
                                 orgs.add(new Organization(new Link(name, urls[i]), positions));
@@ -84,24 +86,23 @@ public class ResumeServlet extends HttpServlet {
                 resume.getSections().remove(type);
             }
         }
-        if (uuid != null && uuid.trim().length() != 0) {
-            storage.update(resume);
-        } else {
+        if (uuid.equals("createUUID") || !isNotEmpty(uuid)){
             storage.save(resume);
+        } else {
+            storage.update(resume);
         }
 
         response.sendRedirect("/resume");
     }
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        Organization.Position emptyPos = new Organization.Position();
-        Organization emptyOrg = new Organization();
+        Resume resume;
         String uuid = request.getParameter("uuid");
-        if (uuid != null && uuid.trim().length() != 0) {
-            Resume resume;
+
+        if (isNotEmpty(uuid)) {
             if (uuid.equals("createUUID")){
-                resume = new Resume();
-                storage.save(resume);
+                resume = new Resume(uuid, "defaultName");
+                //storage.save(resume);
             } else{
                 resume = storage.get(uuid);
             }
@@ -109,7 +110,7 @@ public class ResumeServlet extends HttpServlet {
                 case "view":
                     request.setAttribute("resume", resume);
                     getServletContext().getRequestDispatcher("/WEB-INF/jsp/view.jsp").forward(request, response);
-                    break;
+                    return;
                 case "delete":
                     storage.delete(uuid);
                     break;
@@ -136,28 +137,33 @@ public class ResumeServlet extends HttpServlet {
                             resume.addSection(type, section);
                         }
                     }
-                    OrganizationSection workSect =(OrganizationSection) resume.getSections().get(SectionType.EXPERIENCE);
-                    OrganizationSection eduSect =(OrganizationSection) resume.getSections().get(SectionType.EDUCATION);
-                    workSect.getContent().add(emptyOrg);
-                    eduSect.getContent().add(emptyOrg);
-                    List<Organization> newList = Stream.concat(workSect.getContent().stream(), eduSect.getContent().stream())
-                            .collect(Collectors.toList());
-                    for (Organization org : newList) {
-                        List<Organization.Position> positions = org.getPositions();
-                        if (positions == null){
-                            positions = new ArrayList<>();
-                            org.setPositions(positions);
-                        } else {
-                            positions.add(emptyPos);
-                        }
-                    }
+                    prepareOrganizations(resume);
                     getServletContext().getRequestDispatcher("/WEB-INF/jsp/edit.jsp").forward(request, response);
-                    break;
                 default:
+                    return;
             }
         }
         request.setAttribute("resumes", storage.getAllSorted());
         getServletContext().getRequestDispatcher("/WEB-INF/jsp/list.jsp").forward(request, response);
+    }
+
+    private void prepareOrganizations(Resume resume) {
+        EmptyOrgSectEntity emptyEntity = new EmptyOrgSectEntity();
+        OrganizationSection workSect =(OrganizationSection) resume.getSections().get(SectionType.EXPERIENCE);
+        OrganizationSection eduSect =(OrganizationSection) resume.getSections().get(SectionType.EDUCATION);
+        workSect.getContent().add(emptyEntity.getEmptyOrganization());
+        eduSect.getContent().add(emptyEntity.getEmptyOrganization());
+        List<Organization> newList = Stream.concat(workSect.getContent().stream(), eduSect.getContent().stream())
+                .collect(Collectors.toList());
+        for (Organization org : newList) {
+            List<Organization.Position> positions = org.getPositions();
+            if (positions == null){
+                positions = new ArrayList<>();
+                org.setPositions(positions);
+            } else {
+                positions.add(emptyEntity.getEmptyPosition());
+            }
+        }
     }
 
     private static boolean isNotEmpty(String test){

@@ -1,8 +1,6 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ page import="ru.javawebinar.basejava.model.ContactType" %>
-<%@ page import="ru.javawebinar.basejava.model.OrganizationSection" %>
 <%@ page import="ru.javawebinar.basejava.model.SectionType" %>
-<%@ page import="ru.javawebinar.basejava.model.AbstractSection" %>
 <%--
   Created by IntelliJ IDEA.
   User: varga
@@ -10,18 +8,15 @@
   Time: 15:18
   To change this template use File | Settings | File Templates.
 --%>
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8"%>
 <html>
 <head>
-    <title>All resumes</title>
+    <title>Editing resume</title>
     <link rel="stylesheet" href="css/tableStyle.css">
 </head>
 <body>
 <jsp:include page="snippets/header.jsp"/>
-
-
-<h1>View of resume</h1>
-
+<h1>Edit or create your resume</h1>
 <jsp:useBean id="resume" scope="request" type="ru.javawebinar.basejava.model.Resume"/>
 <form action="resume" method="post">
     <input type="hidden" name="uuid" value="${resume.uuid}">
@@ -91,16 +86,13 @@
                         </c:forEach>
                     </div>
                 </c:forEach>
-
-
-
             </c:when>
         </c:choose>
     </c:forEach>
     <input type="submit" value="Submit">
     <input type="reset" value="Reset">
 </form>
-
+<button onclick="window.history.back()">Go back</button>
 <jsp:include page="snippets/footer.jsp"/>
 </body>
 </html>

@@ -12,18 +12,29 @@ public class EmptyOrgSectEntity {
     public List<Organization.Position> positionList;
     public Link link;
     private List<Organization> listOrg;
-    EmptyOrgSectEntity(){
+    Organization organization;
+    public EmptyOrgSectEntity(){
         listOrg = new ArrayList<>();
         section.setContent(listOrg);
     }
 
     public void reInit(){
-        Organization organization = new Organization();
+        organization = new Organization();
         listOrg.add(organization);
         link = new Link();
         organization.setOrganizationName(link);
         positionList = new ArrayList<>();
         organization.setPositions(positionList);
+
+    }
+
+    public Organization getEmptyOrganization(){
+        reInit();
+        return organization;
+    }
+
+    public Organization.Position getEmptyPosition(){
+        return new Organization.Position();
     }
 
 }

@@ -34,25 +34,24 @@ create table organization
 create unique index organization_organization_name_uindex
     on organization (organization_name);
 
-create unique index organization_url_uindex
-    on organization (url);
-
 create table position
 (
     position          varchar(30)               not null,
     start_date        date default CURRENT_DATE not null,
     end_date          date,
     organization_name varchar(50)               not null
-        constraint position_organization_fk
+        constraint position__org_name_fk
             references organization
-            on update restrict on delete restrict,
+            on update cascade on delete restrict,
     resume_uuid       varchar(36)               not null
         constraint position_resume_uuid_fk
             references resume
             on update restrict on delete cascade,
     type              varchar(15)               not null,
-    constraint position_pk
-        primary key (resume_uuid, position, organization_name)
+    posit_id          serial                    not null
+        constraint position_pk
+            primary key,
+    info              text
 );
 
 create table text_section

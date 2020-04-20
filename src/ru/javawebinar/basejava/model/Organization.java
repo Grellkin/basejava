@@ -12,7 +12,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-import static ru.javawebinar.basejava.util.DateUtil.NOW;
+import static ru.javawebinar.basejava.util.DateUtil.FUTURE;
 import static ru.javawebinar.basejava.util.DateUtil.of;
 
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -92,7 +92,7 @@ public class Organization implements Serializable {
         }
 
         public Position(int startYear, Month startMonth, String title, String description) {
-            this(of(startYear, startMonth), NOW, title, description);
+            this(of(startYear, startMonth), FUTURE, title, description);
         }
 
         public Position(LocalDate dateOfStart, LocalDate dateOfEnd, String position, String info) {
