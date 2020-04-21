@@ -22,6 +22,7 @@ public class ResumeServlet extends HttpServlet {
     private Storage storage = Config.get().getStorage();
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        request.setCharacterEncoding("UTF-8");
         Resume resume;
         String uuid = request.getParameter("uuid");
         if (isNotEmpty(uuid) && !uuid.equals("createUUID")) {

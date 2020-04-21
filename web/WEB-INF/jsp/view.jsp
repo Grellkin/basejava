@@ -1,5 +1,6 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ page import="ru.javawebinar.basejava.model.SectionType" %>
+<%@ page import="ru.javawebinar.basejava.model.ContactType" %>
 <%@ page import="java.time.LocalDate" %><%--
   Created by IntelliJ IDEA.
   User: varga
@@ -21,7 +22,12 @@
                                                                                   height="20dp"></a></h2>
 <address>
     <c:forEach items="${resume.contacts}" var="cont">
-        ${cont.key.title} : ${cont.value}<br>
+        ${cont.key.title} : <c:choose>
+        <c:when test="${cont.key.equals(ContactType.PHONE) || cont.key.equals(ContactType.MOBILE) || cont.key.equals(ContactType.HOME_PHONE)}">
+            ${cont.value}
+        </c:when>
+        <c:when test="${1==1}"><a href="${cont.value}">${cont.value}</a> </c:when>
+        </c:choose><br>
     </c:forEach>
 </address>
 <hr>
@@ -48,8 +54,8 @@
     <hr/>
 <div style="margin-left: 50px">
 <dl>
-    <dt><i>Организация:</i></dt>
-    <dd><b>${org.organizationName.name}</b> &nbsp; ಠ_ಠ &nbsp; ${org.organizationName.url}</dd>
+    <dt><i><b>Организация:</b></i></dt>
+    <dd><b>${org.organizationName.name}</b> &nbsp; ಠ_ಠ &nbsp; <a href="${org.organizationName.url}">${org.organizationName.url}</a></dd>
 </dl>
 </div>
 
@@ -57,11 +63,11 @@
     <c:forEach var="pos" items="${org.positions}">
         <jsp:useBean id="pos" type="ru.javawebinar.basejava.model.Organization.Position"/>
     <dl>
-        <dt>Период работы:</dt>
+        <dt><b>Период работы:</b></dt>
         <dd>
                 ${pos.dateOfStart} - <c:choose>
             <c:when test="${pos.dateOfEnd.equals(LocalDate.of(3000, 1, 1))}">
-                <i>still work</i>
+                <i>still</i>
             </c:when>
             <c:when test="${!pos.dateOfEnd.equals(LocalDate.of(3000, 1, 1))}">
                 ${pos.dateOfEnd}
@@ -69,11 +75,11 @@
         </dd>
     </dl>
     <dl>
-        <dt>Должность:</dt>
+        <dt><b>Должность:</b></dt>
         <dd>${pos.position}</dd>
     </dl>
     <dl>
-        <dt>Описание:</dt>
+        <dt><b>Описание:</b></dt>
         <dd>${pos.info}</dd>
     </dl><br>
     </c:forEach>
